@@ -1,2 +1,35 @@
-<h1>Trips#new</h1>
-<p>Find me in app/views/trips/new.html.erb</p>
+<%# app/views/trips/new.html.erb %>
+
+<div class="container">
+  <h1>新しい旅程を作成</h1>
+
+  <%# エラー表示 %>
+  <%= render 'shared/error_messages', resource: @trip %>
+
+  <%= form_with model: @trip, local: true do |f| %>
+    
+    <div class="field">
+      <%= f.label :title, "旅程のタイトル (必須)" %>
+      <%= f.text_field :title %>
+    </div>
+    
+    <div class="field">
+      <%= f.label :start_date, "開始日 (必須)" %>
+      <%= f.date_field :start_date %>
+    </div>
+    
+    <div class="field">
+      <%= f.label :total_budget, "総予算 (必須)" %>
+      <%= f.number_field :total_budget, min: 0 %>
+    </div>
+    
+    <div class="field">
+      <%= f.label :travel_theme, "旅行のテーマ (必須)" %>
+      <%= f.select :travel_theme, ['温泉重視', '食体験重視', 'アクティビティ重視', 'リラックス', 'その他'], { prompt: "テーマを選択" } %>
+    </div>
+
+    <div class="actions">
+      <%= f.submit "旅程を作成" %>
+    </div>
+  <% end %>
+</div>
