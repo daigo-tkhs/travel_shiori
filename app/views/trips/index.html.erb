@@ -1,2 +1,22 @@
-<h1>Trips#index</h1>
-<p>Find me in app/views/trips/index.html.erb</p>
+<%# app/views/trips/index.html.erb %>
+
+<div class="header">
+  <h1>旅程一覧</h1>
+  <%= link_to "新しい旅程を作成", new_trip_path %>
+</div>
+
+<div class="trip-list-container">
+  <% if @trips.any? %>
+    <% @trips.each do |trip| %>
+      <div class="trip-card">
+        <h2><%= link_to trip.title, trip_path(trip) %></h2>
+        <p>期間: <%= trip.start_date %> - <%= trip.end_date %></p>
+        <p>予算: ¥<%= number_with_delimiter(trip.total_budget) %></p>
+        <p>テーマ: <%= trip.travel_theme %></p>
+      </div>
+    <% end %>
+  <% else %>
+    <p>まだ旅程がありません。新しい旅程を作成しましょう。</p>
+    <%= link_to "新しい旅程を作成", new_trip_path %>
+  <% end %>
+</div>
