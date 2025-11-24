@@ -6,4 +6,7 @@ class TripUser < ApplicationRecord
   
   # 権限レベルの定義 (db_schema.mdに従いenumを使用)
   enum permission_level: { viewer: 1, editor: 2, owner: 3 }
+  
+  validates :user_id, uniqueness: { scope: :trip_id }
+  validates :permission_level, presence: true
 end
