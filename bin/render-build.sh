@@ -2,10 +2,15 @@
 # exit on error
 set -o errexit
 
-# 1. Gemのインストール
+# Install gems
 echo "Installing Gems..."
 bundle install
 
-# 2. アセットの事前コンパイル
+# === ここにDBマイグレーションを追加 ===
+echo "Running Migrations..."
+bundle exec rails db:migrate 
+# ==================================
+
+# Assets precompile
 echo "Precompiling Assets..."
 bundle exec rails assets:precompile
