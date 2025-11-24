@@ -1,0 +1,19 @@
+<%# app/views/shared/_header.html.erb %>
+
+<header class="main-header">
+  <div class="logo-area">
+    <%= link_to "TravelShiori", root_path %>
+  </div>
+
+  <nav class="auth-links">
+    <% if user_signed_in? %>
+      <%# ログイン済みの表示 %>
+      <%= link_to current_user.nickname, edit_user_registration_path %>
+      <%= link_to "ログアウト", destroy_user_session_path, data: { "turbo-method": :delete } %>
+    <% else %>
+      <%# 未ログイン時の表示 %>
+      <%= link_to "ログイン", new_user_session_path %>
+      <%= link_to "新規登録", new_user_registration_path %>
+    <% end %>
+  </nav>
+</header>
