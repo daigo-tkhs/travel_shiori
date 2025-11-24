@@ -11,8 +11,12 @@
   </head>
 
   <body>
+    <%= render 'shared/header' %> <--- ここを追加
+    
     <p class="notice"><%= notice %></p>
     <p class="alert"><%= alert %></p>
     <%= yield %>
+
+    <%= render 'shared/footer' %> <--- ここを追加
   </body>
 </html>
