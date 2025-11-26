@@ -1,5 +1,3 @@
-# app/controllers/messages_controller.rb
-
 class MessagesController < ApplicationController
   before_action :authenticate_user!
   # indexアクションを含め、すべてのアクションの前に旅程を取得する設定を確実に適用
@@ -32,22 +30,33 @@ class MessagesController < ApplicationController
           contents: { role: 'user', parts: { text: @message.prompt } }
         })
 
-        # レスポンスの取得と保存
-        if result && result.any?
-           candidates = result[0].fetch('candidates', [])
-           if candidates.any?
-             ai_response = candidates[0]['content']['parts'][0]['text']
+        # --- 修正: ログ出力と安全なデータ取得 ---
+        Rails.logger.info "Gemini API Result: #{result.inspect}" # ログに結果を出力
+
+        # gemini-ai のバージョンによってレスポンス構造が異なる場合があるため、柔軟に対応
+        # result が配列の場合とハッシュの場合を考慮して最初の要素を取得
+        raw_response = result.is_a?(Array) ? result.first : result
+        
+        if raw_response && raw_response['candidates'].present?
+           candidates = raw_response['candidates']
+           # digを使って安全に深い階層の値を取得（途中でnilがあってもエラーにならない）
+           ai_response = candidates[0].dig('content', 'parts', 0, 'text')
+           
+           if ai_response.present?
              @message.update!(response: ai_response)
              redirect_to trip_messages_path(@trip), notice: 'AIからの返信が届きました！'
            else
-             redirect_to trip_messages_path(@trip), alert: 'AIからの応答が空でした。'
+             redirect_to trip_messages_path(@trip), alert: 'AIからの応答テキストが見つかりませんでした。'
            end
         else
-           redirect_to trip_messages_path(@trip), alert: 'AIからの応答がありませんでした。'
+           redirect_to trip_messages_path(@trip), alert: 'AIからの有効な応答がありませんでした。'
         end
+        # ---------------------------------------
 
       rescue => e
         Rails.logger.error "Gemini API Error: #{e.message}"
+        # エラーの詳細もログに残す
+        Rails.logger.error e.backtrace.join("\n")
         redirect_to trip_messages_path(@trip), alert: "AIとの通信に失敗しました: #{e.message}"
       end
     else
