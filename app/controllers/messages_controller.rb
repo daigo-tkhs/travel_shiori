@@ -20,6 +20,7 @@ class MessagesController < ApplicationController
         client = Gemini.new(
           credentials: {
             service: 'generative-language-api',
+            version: 'v1beta', # <--- ★ここが重要（APIバージョン指定）
             api_key: Rails.application.credentials.gemini[:api_key]
           },
           options: { model: 'gemini-1.5-flash', server_sent_events: false }
@@ -30,7 +31,7 @@ class MessagesController < ApplicationController
           contents: { role: 'user', parts: { text: @message.prompt } }
         })
 
-        # --- 修正: ログ出力と安全なデータ取得 ---
+        # --- ログ出力と安全なデータ取得 ---
         Rails.logger.info "Gemini API Result: #{result.inspect}" # ログに結果を出力
 
         # gemini-ai のバージョンによってレスポンス構造が異なる場合があるため、柔軟に対応
