@@ -4,10 +4,9 @@ Rails.application.routes.draw do
   # 旅程に関するリソース（作成、一覧、詳細など）を定義
   resources :trips do
     # 旅程にネストする機能
-    resources :messages, only: [:index, :create, :update, :destroy] # indexも必要になる可能性があります
+    resources :messages, only: [:index, :create, :update, :destroy]
     
-    # ★ここが重要修正ポイント★ :new を追加しました
-    resources :spots, only: [:new, :create, :update, :destroy] 
+    resources :spots, only: [:new, :create, :edit, :update, :destroy] 
     
     resources :checklists, only: [:index, :create, :update] 
     

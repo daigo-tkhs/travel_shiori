@@ -24,6 +24,15 @@ class TripsController < ApplicationController
   end
 
   def show
+    # 共通ヘッダーを非表示にするフラグ
+    @hide_header = true
+    
+    # 費用の集計（スポットの概算費用合計）
+    @total_estimated_cost = @trip.spots.sum(:estimated_cost) || 0
+    
+    # 日数の計算（スポットの最大日数、なければ1日）
+    max_day = @trip.spots.maximum(:day_number) || 1
+    @end_date = @trip.start_date + (max_day - 1).days
   end
 
   def edit
