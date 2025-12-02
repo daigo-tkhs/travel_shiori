@@ -110,7 +110,7 @@
       
       <% if @trip.spots.present? %>
         <%# スポットをday_numberでグループ化してループ %>
-        <% @trip.spots.order(day_number: :asc, created_at: :asc).group_by(&:day_number).each do |day_num, spots| %>
+        <% @trip.spots.order(day_number: :asc, position: :asc).group_by(&:day_number).each do |day_num, spots| %>
           
           <%# --- 日付ヘッダーブロック --- %>
           <div class="day-block">
@@ -130,6 +130,7 @@
 
             <div class="relative border-l-2 border-gray-200 ml-4 pl-6 space-y-6 pb-4">
               <% spots.each_with_index do |spot, index| %>
+                
                 <%# スポットカード %>
                 <div class="relative group">
                   <div class="absolute -left-[31px] top-0 w-4 h-4 rounded-full bg-white border-2 border-blue-500"></div>
@@ -190,26 +191,28 @@
                     </div>
                   </div>
                   
-                  <%# 移動時間（その日の最後のスポット以外で表示） %>
-                  <% next_spot = @trip.spots.find_by(day_number: spot.day_number, position: spot.position + 1) %>
+                  <%# --- 修正: 移動時間の表示（次のスポットへの時間） --- %>
+                  <%# 現在のスポットの「次」にあたるスポットを取得 %>
+                  <% next_spot = spots[index + 1] %>
+                  <%# 次のスポットがあり、かつ travel_time が存在する場合のみ表示 %>
                   <% if next_spot && next_spot.travel_time.present? %>
                     <div class="flex items-center justify-center gap-2 text-xs text-gray-400 my-4">
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                        <path d="M6.5 3c... (省略) ..." />
-                        <path d="M6.5 18... (省略) ..." />
-                        <path d="M13.25 5... (省略) ..." />
-                        <path d="M15.5 18... (省略) ..." />
+                        <path d="M6.5 3c-1.051 0-2.093.04-3.125.117A1.49 1.49 0 0 0 2 4.607V10.5h9V4.606c0-.771-.59-1.43-1.375-1.489A41.568 41.568 0 0 0 6.5 3ZM2 12v2.5A1.5 1.5 0 0 0 3.5 16h.041a3 3 0 0 1 5.918 0h.791a.75.75 0 0 0 .75-.75V12H2Z" />
+                        <path d="M6.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM13.25 5a.75.75 0 0 0-.75.75v8.514a3.001 3.001 0 0 1 4.893 1.44c.37-.275.61-.719.595-1.231a20.381 20.381 0 0 0-.176-2.635L17.5 7.5c0-1.33-.96-2.5-2.406-2.5h-.844ZM15.5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
                       </svg>
+                      <%# 時間を表示 %>
                       <span>移動 <%= next_spot.travel_time %>分 (車)</span>
                     </div>
                   <% end %>
+
                 </div>
               <% end %>
             </div>
           </div>
         <% end %>
       
-        <%# スポット追加ボタン（リスト末尾） %>
+        <%# スポット追加ボタン %>
         <div class="mt-6 text-center">
           <%= link_to new_trip_spot_path(@trip), class: "inline-flex items-center gap-2 bg-white border-2 border-blue-500 text-blue-600 px-6 py-2 rounded-full font-bold text-sm hover:bg-blue-50 transition-colors shadow-sm" do %>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
