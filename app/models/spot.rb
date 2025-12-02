@@ -3,7 +3,8 @@ class Spot < ApplicationRecord
   
   # バリデーション
   validates :name, presence: true
-  validates :day_number, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
+  # ★修正: day_number を必須(presence: true)に変更し、空のデータが登録できないようにブロックする
+  validates :day_number, presence: true, numericality: { only_integer: true, greater_than: 0 }
   
   # --- Geocoder (緯度経度自動取得) ---
   geocoded_by :name
@@ -33,7 +34,6 @@ class Spot < ApplicationRecord
     return unless geocoded?
 
     # 現在のスポットの仮のpositionを決定
-    # (新規作成時でpositionが未定の場合は、その日の末尾と仮定)
     current_pos = self.position || (self.trip.spots.where(day_number: day_number).maximum(:position).to_i + 1)
 
     # 「同じ日」の中で、「自分より前」にある、「一番近い」スポットを探す
@@ -44,18 +44,14 @@ class Spot < ApplicationRecord
                         .first
 
     if previous_spot && previous_spot.geocoded?
-      # Serviceクラスを使ってGoogle Maps APIを叩く
       service = TravelTimeService.new
       time = service.calculate_time(previous_spot, self)
-      
-      # 取得できた時間をセット (取得失敗時はnilのままにするか、0にするかは要件次第。ここでは値をセット)
       self.travel_time = time if time
     else
       # 前のスポットがない（その日の1番目）場合は 0分
       self.travel_time = 0
     end
   rescue => e
-    # エラーが発生しても保存自体は止めないようにログを出してスルー
     Rails.logger.error "Failed to calculate travel time: #{e.message}"
   end
 end
