@@ -1,5 +1,7 @@
 class Spot < ApplicationRecord
   belongs_to :trip
+  # scope: [:trip_id, :day_number] -> 「同じ旅程」かつ「同じ日」の中で順番を管理する
+  acts_as_list scope: [:trip_id, :day_number]
   
   # バリデーション
   validates :name, presence: true

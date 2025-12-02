@@ -47,3 +47,5 @@ gem "tailwindcss-rails", "~> 4.4"
 gem 'devise-i18n'
 
 gem "google_maps_service"
+
+gem 'acts_as_list'

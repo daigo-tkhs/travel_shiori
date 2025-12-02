@@ -10,7 +10,11 @@ Rails.application.routes.draw do
     resources :messages, only: [:index, :create, :update, :destroy] 
     
     # スポット機能: ★edit を追加し、ビューのエラーを解消★
-    resources :spots, only: [:new, :create, :edit, :update, :destroy] 
+    resources :spots, only: [:new, :create, :edit, :update, :destroy] do
+      member do
+        patch :move
+      end
+    end
     
     # チェックリスト機能
     resources :checklists, only: [:index, :create, :update]
