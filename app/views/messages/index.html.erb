@@ -44,8 +44,18 @@
       
       <%# ユーザーのメッセージ（右側） %>
       <div class="flex justify-end">
-        <div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none shadow-md text-sm max-w-[80%] leading-relaxed">
-          <%= simple_format(message.prompt, class: "mb-0") %>
+        <div class="flex flex-col items-end max-w-[80%]">
+          <div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none shadow-md text-sm leading-relaxed">
+            <%= simple_format(message.prompt, class: "mb-0") %>
+          </div>
+          
+          <%# 自分のメッセージの場合のみ、編集・削除ボタンを表示 %>
+          <% if message.user_id == current_user.id %>
+            <div class="flex gap-3 mt-1 mr-1 text-[10px] text-gray-400">
+              <%= link_to "編集", edit_trip_message_path(@trip, message), class: "hover:text-blue-600 transition flex items-center gap-0.5" %>
+              <%= link_to "削除", trip_message_path(@trip, message), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" }, class: "hover:text-red-500 transition flex items-center gap-0.5" %>
+            </div>
+          <% end %>
         </div>
       </div>
 
