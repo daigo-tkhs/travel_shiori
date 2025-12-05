@@ -109,6 +109,12 @@
                         <%= f.hidden_field 'spot[estimated_cost]', value: spot_data['estimated_cost'] %>
                         <%= f.hidden_field 'spot[duration]', value: spot_data['duration'] %>
                         
+                        <%# 予約要否チェック %>
+                        <label class="flex items-center gap-2 mb-2 cursor-pointer">
+                          <%= f.check_box 'spot[reservation_required]', class: "w-3.5 h-3.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %>
+                          <span class="text-xs text-gray-700 font-medium">このスポットは予約が必要</span>
+                        </label>
+
                         <div class="flex gap-2">
                           <%# 日付選択プルダウン %>
                           <%= f.select 'spot[day_number]', 
