@@ -25,6 +25,11 @@ Rails.application.routes.draw do
     end
   end
 
+  # 開発環境でのみメール確認画面を有効化
+  if Rails.env.development?
+    mount LetterOpenerWeb::Engine, at: "/letter_opener"
+  end
+
   # アプリケーションのルートパスを旅程一覧に設定
   root "trips#index"
 
