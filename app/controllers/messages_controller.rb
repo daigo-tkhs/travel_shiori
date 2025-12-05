@@ -61,11 +61,16 @@ class MessagesController < ApplicationController
               "name": "東京タワー",
               "description": "東京のシンボル。メインデッキからは東京の景色を一望できます。",
               "estimated_cost": 1200,
-              "duration": 60
+              "duration": 60,
+              "google_map_url": "https://www.google.com/maps/search/?api=1&query=東京タワー"
             }
           ],
           "message": "東京タワーはいかがでしょうか？定番ですが外せません！"
         }
+
+        # 注意事項:
+        1. estimated_cost は必ず**日本円(JPY)**の数値で入力してください。（例: 50円ではなく5000円など、現実的な観光費用）
+        2. google_map_url には、そのスポットのGoogleマップ検索URLを含めてください。
       INSTRUCTION
 
       client = Gemini.new(
@@ -90,9 +95,10 @@ class MessagesController < ApplicationController
           
           if ai_response.present?
             message_record.update!(response: ai_response)
-            redirect_to trip_messages_path(@trip)
+            # redirect_to は削除（Turbo Streamで更新される場合もあるため、呼び出し元で制御するか、ここでのリダイレクトは維持してもOKですが、今回はそのままにします）
+             redirect_to trip_messages_path(@trip)
           else
-            redirect_to trip_messages_path(@trip), alert: 'AIからの応答テキストが見つかりませんでした。'
+             redirect_to trip_messages_path(@trip), alert: 'AIからの応答テキストが見つかりませんでした。'
           end
       else
           redirect_to trip_messages_path(@trip), alert: 'AIからの有効な応答がありませんでした。'
