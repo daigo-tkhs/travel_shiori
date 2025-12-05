@@ -58,6 +58,6 @@ class SpotsController < ApplicationController
   # ↑↑↑ ここまで ↑↑↑
 
   def spot_params
-    params.require(:spot).permit(:name, :day_number, :estimated_cost, :duration, :booking_url)
+    params.require(:spot).permit(:name, :day_number, :estimated_cost, :duration, :booking_url, :reservation_required)
   end
 end

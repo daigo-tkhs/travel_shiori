@@ -23,6 +23,11 @@
       <%= f.number_field :duration, min: 0, placeholder: "60", class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
     </div>
   </div>
+
+  <div class="flex items-center gap-2 py-2">
+    <%= f.check_box :reservation_required, class: "w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %>
+    <%= f.label :reservation_required, "このスポットは予約が必要", class: "text-sm font-bold text-gray-700" %>
+  </div>
   
   <div>
     <%= f.label :booking_url, "予約/参考URL", class: "block text-sm font-bold text-gray-700 mb-1" %>
