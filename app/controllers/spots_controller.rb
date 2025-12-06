@@ -3,6 +3,7 @@ class SpotsController < ApplicationController
   before_action :set_trip
   before_action :set_spot, only: [:edit, :update, :destroy, :move]
   before_action :authorize_editor!
+  before_action :hide_global_header, only: [:new, :create, :edit, :update]
 
   def new
     @spot = @trip.spots.build
@@ -59,6 +60,10 @@ class SpotsController < ApplicationController
     unless @trip.editable_by?(current_user)
       redirect_to trip_path(@trip), alert: "編集権限がありません。"
     end
+  end
+
+  def hide_global_header
+    @hide_header = true
   end
 
   def spot_params

@@ -4,6 +4,7 @@ class MessagesController < ApplicationController
   before_action :set_message, only: [:edit, :update, :destroy]
 
   def index
+    @hide_header = true
     @messages = @trip.messages.order(created_at: :asc)
     @message = Message.new
   end

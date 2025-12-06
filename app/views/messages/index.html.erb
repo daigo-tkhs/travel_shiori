@@ -2,22 +2,30 @@
 
 <div class="bg-gray-100 min-h-screen flex flex-col">
   
-  <%# --- 1. ヘッダー --- %>
-  <div class="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50 px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <%= link_to trip_path(@trip), class: "p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600" do %>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-        </svg>
-      <% end %>
-      <div>
-        <h1 class="font-bold text-gray-800 text-sm"><%= @trip.title %></h1>
-        <p class="text-xs text-purple-600 flex items-center gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
-            <path d="M15.98 1.804a1 1 0 0 0-1.96 0l-.24 1.192a1 1 0 0 1-.784.785l-1.192.238a1 1 0 0 0 0 1.962l1.192.238a1 1 0 0 1 .785.785l.238 1.192a1 1 0 0 0 1.962 0l.238-1.192a1 1 0 0 1 .785-.785l1.192-.238a1 1 0 0 0 0-1.962l-1.192-.238a1 1 0 0 1-.785-.785l-.238-1.192ZM6.949 5.684a1 1 0 0 0-1.898 0l-.683 2.051a1 1 0 0 1-.95.69h-2.16a1 1 0 0 0-.95 1.31l1.75 2.545a1 1 0 0 1 .35 1.077l-.683 2.051a1 1 0 0 0 1.536 1.116l1.75-1.27a1 1 0 0 1 1.175 0l1.75 1.27a1 1 0 0 0 1.536-1.116l-.683-2.05c-.114-.34.002-.715.35-1.078l1.75-2.545a1 1 0 0 0-.95-1.31h-2.16a1 1 0 0 1-.95-.69l-.683-2.05Z" />
+  <%# --- 1. ヘッダー (共通デザイン・グラデーション) --- %>
+  <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md sticky top-0 z-50">
+    <div class="px-4 py-4">
+      <div class="flex items-start justify-between gap-3">
+        <%# 戻るボタン: 旅程詳細画面へ %>
+        <%= link_to trip_path(@trip), class: "p-2 hover:bg-white/20 rounded-full transition-colors flex-shrink-0" do %>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
           </svg>
-          AIトラベルアシスタント
-        </p>
+        <% end %>
+
+        <%# タイトルエリア %>
+        <div class="flex-1 pt-1">
+          <h1 class="text-lg font-bold leading-tight mb-1"><%= @trip.title %></h1>
+          <div class="flex items-center gap-2 text-blue-100 text-xs">
+            <%# チャット画面であることを示すアイコンとテキスト %>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
+              <path d="M15.98 1.804a1 1 0 0 0-1.96 0l-.24 1.192a1 1 0 0 1-.784.785l-1.192.238a1 1 0 0 0 0 1.962l1.192.238a1 1 0 0 1 .785.785l.238 1.192a1 1 0 0 0 1.962 0l.238-1.192a1 1 0 0 1 .785-.785l1.192-.238a1 1 0 0 0 0-1.962l-1.192-.238a1 1 0 0 1-.785-.785l-.238-1.192ZM6.949 5.684a1 1 0 0 0-1.898 0l-.683 2.051a1 1 0 0 1-.95.69h-2.16a1 1 0 0 0-.95 1.31l1.75 2.545a1 1 0 0 1 .35 1.077l-.683 2.051a1 1 0 0 0 1.536 1.116l1.75-1.27a1 1 0 0 1 1.175 0l1.75 1.27a1 1 0 0 0 1.536-1.116l-.683-2.05c-.114-.34.002-.715.35-1.078l1.75-2.545a1 1 0 0 0-.95-1.31h-2.16a1 1 0 0 1-.95-.69l-.683-2.05Z" />
+            </svg>
+            <span>AIトラベルアシスタント</span>
+          </div>
+        </div>
+        
+        <%# 右側ボタン: なし %>
       </div>
     </div>
   </div>
@@ -40,18 +48,13 @@
 
     <%# 履歴ループ %>
     <% @messages.each do |message| %>
-      
-      <%# ★修正: turbo_frame_tag で囲む範囲を、ユーザーメッセージとAI返答の両方に拡大 %>
       <%= turbo_frame_tag message do %>
-        
         <%# ユーザーのメッセージ（右側） %>
         <div class="flex justify-end mb-2">
           <div class="flex flex-col items-end max-w-[80%]">
             <div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none shadow-md text-sm leading-relaxed">
               <%= simple_format(message.prompt, class: "mb-0") %>
             </div>
-            
-            <%# 自分のメッセージの場合のみ、編集・削除ボタンを表示 %>
             <% if message.user_id == current_user.id %>
               <div class="flex gap-3 mt-1 mr-1 text-[10px] text-gray-400">
                 <%= link_to "編集", edit_trip_message_path(@trip, message), class: "hover:text-blue-600 transition flex items-center gap-0.5" %>
@@ -71,16 +74,14 @@
             </div>
             
             <div class="max-w-[90%]">
-              <%# JSON判定ロジック（Helperを使用） %>
               <% suggestion = parse_spot_suggestion(message.response) %>
 
               <% if suggestion %>
-                <%# --- A. スポット提案の場合（カード表示） --- %>
+                <%# A. スポット提案 %>
                 <div class="space-y-3">
                   <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 text-sm text-gray-800">
                     <%= suggestion['message'] %>
                   </div>
-
                   <% suggestion['spots'].each do |spot_data| %>
                     <div class="bg-white p-3 rounded-xl border border-blue-100 shadow-md overflow-hidden">
                       <div class="flex justify-between items-start gap-2 mb-2">
@@ -100,36 +101,30 @@
                             </svg>
                             Map
                           <% end %>
-                      <% end %>
-                    </div>
-                      <%# 日付選択付き追加フォーム %>
-                      <%= form_with url: trip_spots_path(@trip), method: :post, data: { turbo_frame: "_top" }, class: "mt-2" do |f| %>
-                        <%# 隠しフィールドでスポット情報を渡す %>
+                        <% end %>
+                      </div>
+
+                      <%= form_with url: trip_spots_path(@trip), method: :post, data: { turbo_frame: "_top" }, class: "mt-3 pt-2 border-t border-gray-100" do |f| %>
                         <%= f.hidden_field 'spot[name]', value: spot_data['name'] %>
                         <%= f.hidden_field 'spot[estimated_cost]', value: spot_data['estimated_cost'] %>
                         <%= f.hidden_field 'spot[duration]', value: spot_data['duration'] %>
                         
-                        <%# 予約要否チェック %>
                         <label class="flex items-center gap-2 mb-2 cursor-pointer">
                           <%= f.check_box 'spot[reservation_required]', class: "w-3.5 h-3.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %>
                           <span class="text-xs text-gray-700 font-medium">このスポットは予約が必要</span>
                         </label>
-
+                        
                         <div class="flex gap-2">
-                          <%# 日付選択プルダウン %>
                           <%= f.select 'spot[day_number]', 
                               options_for_select(trip_days_options(@trip)), 
                               {}, 
                               class: "flex-1 text-xs border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500 py-1.5" %>
                           
-                          <%# 追加ボタン %>
-                          <% if @trip.editable_by?(current_user) %>
-                            <%= f.button type: "submit", class: "bg-blue-600 text-white text-xs font-bold py-1.5 px-3 rounded-lg hover:bg-blue-700 transition flex items-center gap-1 flex-shrink-0" do %>
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                                <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
-                              </svg>
-                              追加
-                            <% end %>
+                          <%= f.button type: "submit", class: "bg-blue-600 text-white text-xs font-bold py-1.5 px-3 rounded-lg hover:bg-blue-700 transition flex items-center gap-1 flex-shrink-0" do %>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                              <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+                            </svg>
+                            追加
                           <% end %>
                         </div>
                       <% end %>
@@ -138,7 +133,7 @@
                 </div>
 
               <% else %>
-                <%# --- B. 通常のテキストの場合（吹き出し表示） --- %>
+                <%# B. 通常のテキスト %>
                 <div class="bg-white p-4 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 text-sm text-gray-800 leading-relaxed prose prose-sm prose-blue">
                   <%= simple_format(message.response) %>
                 </div>
@@ -146,23 +141,17 @@
             </div>
           </div>
         <% end %>
-
       <% end %>
-      <%# ▲▲▲ turbo_frame_tag 終了 ▲▲▲ %>
-
     <% end %>
-    
-    <%# 自動スクロール用のアンカー %>
     <div id="scroll-anchor"></div>
   </div>
 
-  <%# --- 3. 入力フォーム（下部固定） --- %>
+  <%# --- 3. 入力フォーム --- %>
   <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50 safe-area-pb">
     <div class="max-w-md md:max-w-4xl mx-auto">
       <%= form_with model: [@trip, @message], local: true, class: "relative" do |f| %>
         <div class="flex items-end gap-2 bg-gray-100 p-2 rounded-3xl border border-transparent focus-within:border-blue-500 focus-within:bg-white transition-colors">
           <%= f.text_area :prompt, placeholder: "メッセージを入力...", rows: 1, class: "w-full bg-transparent border-none focus:ring-0 resize-none max-h-32 py-2.5 px-3 text-sm", oninput: 'this.style.height = "";this.style.height = this.scrollHeight + "px"' %>
-          
           <%= f.button type: "submit", class: "bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition shadow-sm mb-0.5 mr-0.5 flex-shrink-0" do %>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
               <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
