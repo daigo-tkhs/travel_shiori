@@ -61,8 +61,7 @@ class MessagesController < ApplicationController
               "name": "東京タワー",
               "description": "東京のシンボル。メインデッキからは東京の景色を一望できます。",
               "estimated_cost": 1200,
-              "duration": 60,
-              "google_map_url": "http://maps.google.com/..."
+              "duration": 60
             }
           ],
           "message": "東京タワーはいかがでしょうか？定番ですが外せません！"
@@ -70,7 +69,7 @@ class MessagesController < ApplicationController
 
         # 注意事項:
         1. estimated_cost は必ず**日本円(JPY)**の数値で入力してください。（ホテルの場合は1泊1名あたりの目安）
-        2. google_map_url には、その場所のGoogleマップ検索URLを含めてください。
+        2. description は簡潔に魅力的な説明を入れてください。
       INSTRUCTION
 
       client = Gemini.new(
