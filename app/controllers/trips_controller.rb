@@ -24,15 +24,38 @@ class TripsController < ApplicationController
   end
 
   def show
-    # 共通ヘッダーを非表示にするフラグ
     @hide_header = true
     
-    # 費用の集計（スポットの概算費用合計）
-    @total_estimated_cost = @trip.spots.sum(:estimated_cost) || 0
+    # スポットを日付順・順番通りに取得
+    @spots = @trip.spots.order(:day_number, :position)
     
-    # 日数の計算（スポットの最大日数、なければ1日）
+    # --- 全体の集計 ---
+    # 概算費用の合計
+    @total_estimated_cost = @spots.sum(:estimated_cost)
+    # 滞在時間の合計 (分)
+    @total_duration_mins = @spots.sum(:duration)
+    # 移動時間の合計 (分) - nilの場合は0として計算
+    @total_travel_mins = @spots.sum { |s| s.travel_time.to_i }
+    # 総合計時間 (分)
+    @grand_total_mins = @total_duration_mins + @total_travel_mins
+    
+    # --- 日ごとの集計 (ハッシュを作成) ---
+    # 例: { 1 => { cost: 5000, time: 180 }, 2 => ... }
+    @daily_stats = @spots.group_by(&:day_number).transform_values do |day_spots|
+      cost = day_spots.sum(&:estimated_cost)
+      stay = day_spots.sum(&:duration)
+      travel = day_spots.sum { |s| s.travel_time.to_i }
+      {
+        cost: cost,
+        stay: stay,
+        travel: travel,
+        total_time: stay + travel
+      }
+    end
+    
+    # 終了日の計算（変更なし）
     max_day = @trip.spots.maximum(:day_number) || 1
-    @end_date = @trip.start_date + (max_day - 1).days
+    @end_date = @trip.start_date ? @trip.start_date + (max_day - 1).days : nil
   end
 
   def edit
