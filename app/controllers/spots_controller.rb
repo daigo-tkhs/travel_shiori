@@ -36,19 +36,28 @@ class SpotsController < ApplicationController
     redirect_to trip_path(@trip), notice: 'スポットを削除しました。', status: :see_other
   end
 
+  # --- 並び替え処理 ---
   def move
-    # 日付の変更があるかチェック
+    # パラメータの取得
     new_day = params[:day_number].to_i
-    
-    if new_day.present? && @spot.day_number != new_day
-      # 日付が変わる場合、まず日付を更新（acts_as_listのスコープが変わるため、自動的に旧リストから外れて新リストの末尾につく）
-      @spot.update(day_number: new_day)
+    new_position = params[:position].to_i
+    # トランザクションで囲んで、失敗したらロールバックさせる
+    Spot.transaction do
+      # 1. 日付の変更がある場合（かつ、1以上の有効な値の場合）
+      if new_day > 0 && @spot.day_number != new_day
+        # 日付を更新（バリデーションエラーならここで例外発生）
+        @spot.update!(day_number: new_day)
+        # acts_as_listのスコープが変わるため、一度リストから外れて新リストの末尾に移動する
+      end
+      # 2. 並び順の変更
+      # insert_at は acts_as_list のメソッド
+      @spot.insert_at(new_position)
     end
-
-    # その後、指定の位置に挿入
-    @spot.insert_at(params[:position].to_i)
-
     head :ok
+  rescue => e
+    # 失敗した場合はログに出力し、エラーを返す
+    Rails.logger.error "Move failed: #{e.message}"
+    head :unprocessable_entity
   end
 
   private

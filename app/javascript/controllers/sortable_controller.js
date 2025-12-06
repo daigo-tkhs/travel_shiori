@@ -6,7 +6,7 @@ export default class extends Controller {
 
   connect() {
     this.sortable = Sortable.create(this.element, {
-      group: 'shared-spots', // ★追加: 同じグループ名同士で移動可能にする
+      group: 'shared-spots',
       animation: 150,
       handle: ".cursor-move",
       onEnd: this.end.bind(this)
@@ -16,8 +16,8 @@ export default class extends Controller {
   end(event) {
     const id = event.item.dataset.id
     const newIndex = event.newIndex + 1
-    // ★追加: 移動先のリスト（コンテナ）から data-day-number を取得
     const newDayNumber = event.to.dataset.dayNumber
+    console.log("Moved to Day:", newDayNumber); 
 
     fetch(this.urlValue.replace(":id", id), {
       method: "PATCH",
@@ -27,7 +27,7 @@ export default class extends Controller {
       },
       body: JSON.stringify({ 
         position: newIndex,
-        day_number: newDayNumber // ★追加: 日数も送信
+        day_number: newDayNumber // ここで送る
       })
     })
   }
