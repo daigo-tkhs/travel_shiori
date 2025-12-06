@@ -16,7 +16,11 @@ Rails.application.routes.draw do
     end
 
     # チェックリスト機能
-    resources :checklists, only: [:index, :create, :update]
+    resources :checklists, only: [:index, :create, :update, :destroy] do
+      collection do
+        post :import
+      end
+    end
     
     # 共有設定画面
     member do

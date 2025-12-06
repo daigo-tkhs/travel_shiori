@@ -10,11 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_12_05_145341) do
+ActiveRecord::Schema[7.1].define(version: 2025_12_06_032918) do
   create_table "checklist_items", charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
-    t.bigint "trip_id", null: false
     t.string "name"
-    t.boolean "is_checked"
+    t.boolean "is_checked", default: false, null: false
+    t.bigint "trip_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["trip_id"], name: "index_checklist_items_on_trip_id"
