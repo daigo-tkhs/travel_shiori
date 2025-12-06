@@ -37,9 +37,18 @@ class SpotsController < ApplicationController
   end
 
   def move
-    # acts_as_list のメソッドを使って位置を変更
+    # 日付の変更があるかチェック
+    new_day = params[:day_number].to_i
+    
+    if new_day.present? && @spot.day_number != new_day
+      # 日付が変わる場合、まず日付を更新（acts_as_listのスコープが変わるため、自動的に旧リストから外れて新リストの末尾につく）
+      @spot.update(day_number: new_day)
+    end
+
+    # その後、指定の位置に挿入
     @spot.insert_at(params[:position].to_i)
-    head :ok # 画面遷移せず、成功ステータスだけ返す
+
+    head :ok
   end
 
   private
