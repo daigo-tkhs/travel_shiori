@@ -122,6 +122,10 @@ GEM
     devise-i18n (1.15.0)
       devise (>= 4.9.0)
       rails-i18n
+    dotenv (3.2.0)
+    dotenv-rails (3.2.0)
+      dotenv (= 3.2.0)
+      railties (>= 6.1)
     drb (2.2.3)
     erb (6.0.0)
     erubi (1.13.1)
@@ -368,6 +372,7 @@ DEPENDENCIES
   debug
   devise (~> 4.9)
   devise-i18n
+  dotenv-rails
   gemini-ai (~> 4.3)
   geocoder (~> 1.8)
   google_maps_service
