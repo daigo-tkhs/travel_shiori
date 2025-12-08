@@ -105,7 +105,7 @@ Rails.application.configure do
     password: ENV['SENDGRID_API_KEY'],
     domain: 'travel-shiori.onrender.com',
     address: 'smtp.sendgrid.net',
-    port: 587,
+    port: 2525,
     authentication: :plain,
     enable_starttls_auto: true
   }
