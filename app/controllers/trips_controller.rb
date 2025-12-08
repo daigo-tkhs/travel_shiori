@@ -86,6 +86,20 @@ class TripsController < ApplicationController
     @trip_users = @trip.trip_users.includes(:user).order(permission_level: :asc)
   end
 
+  def invite
+    @trip = Trip.find(params[:id])
+    target_email = params[:email]
+    if target_email.present?
+      # メール送信
+      UserMailer.with(to: target_email, trip: @trip, inviter: current_user).invite_to_trip.deliver_later
+      # 共有画面にリダイレクト
+      redirect_to sharing_trip_path(@trip), notice: "#{target_email} に招待状を送信しました！"
+    else
+      # メールアドレスが空の場合
+      redirect_to sharing_trip_path(@trip), alert: "メールアドレスを入力してください。"
+    end
+  end
+
   private
 
   def trip_params

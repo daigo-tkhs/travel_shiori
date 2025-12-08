@@ -35,6 +35,11 @@ Rails.application.routes.draw do
 
     # お気に入り機能 (単数形 resource なのでURLにidが含まれません)
     resource :favorite, only: [:create, :destroy]
+
+    # 招待メールを送るためのURL (POST /trips/:id/invite)
+    member do
+      post :invite
+    end
   end
 
   # 開発環境でのみメール確認画面を有効化

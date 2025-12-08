@@ -1,14 +1,16 @@
 class UserMailer < ApplicationMailer
-
-  # Subject can be set in your I18n file at config/locales/en.yml
-  # with the following lookup:
-  #
-  #   en.user_mailer.welcome.subject
-  #
   def welcome
     @greeting = "Hi"
+    mail to: params[:to], subject: "【TripConcierge】ようこそ！旅の準備を始めましょう"
+  end
 
-    # ▼ 修正箇所: params[:to] を使うように変更します
-    mail to: params[:to], subject: "Welcome to TripConcierge!"
+  def invite_to_trip
+    @trip = params[:trip]
+    @inviter = params[:inviter]
+    
+    mail(
+      to: params[:to], 
+      subject: "【TripConcierge】#{@inviter.nickname}さんから旅の招待状が届いています"
+    )
   end
 end
