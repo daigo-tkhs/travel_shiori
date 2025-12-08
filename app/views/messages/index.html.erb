@@ -1,7 +1,7 @@
 <%# app/views/messages/index.html.erb %>
 
 <div class="bg-gray-100 min-h-screen flex flex-col">
-  
+
   <%# --- 1. ヘッダー (共通デザイン・グラデーション) --- %>
   <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md sticky top-0 z-50">
     <div class="px-4 py-4">
@@ -35,11 +35,9 @@
     
     <%# 初回メッセージ（固定） %>
     <div class="flex justify-start items-start gap-2">
-      <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500 flex items-center justify-center flex-shrink-0 text-white shadow-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-          <path d="M9 4.5a.75.75 0 0 1 .721.544l.813 2.846a3.75 3.75 0 0 0 2.576 2.576l2.846.813a.75.75 0 0 1 0 1.442l-2.846.813a3.75 3.75 0 0 0-2.576 2.576l-.813 2.846a.75.75 0 0 1-1.442 0l-.813-2.846a3.75 3.75 0 0 0-2.576-2.576l-2.846-.813a.75.75 0 0 1 0-1.442l2.846-.813a3.75 3.75 0 0 0 2.576-2.576l.813-2.846A.75.75 0 0 1 9 4.5ZM9 6a.75.75 0 0 1 .75.75V15a.75.75 0 0 1-1.5 0V6.75A.75.75 0 0 1 9 6Z" />
-        </svg>
-      </div>
+      <%# --- 変更点: shadow-sm を削除 --- %>
+      <%= image_tag "ai_concierge_icon.png", class: "w-8 h-8 rounded-full object-cover flex-shrink-0", alt: "AI Icon" %>
+      
       <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-100 text-sm text-gray-800 max-w-[85%] leading-relaxed">
         こんにちは！旅行の計画でお困りですか？<br>
         「おすすめの観光地は？」「2日目のランチどこがいい？」など、なんでも聞いてください！
@@ -67,11 +65,8 @@
         <%# AIの返答（左側） %>
         <% if message.response.present? %>
           <div class="flex justify-start items-start gap-2 mb-6">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500 flex items-center justify-center flex-shrink-0 text-white shadow-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                <path d="M9 4.5a.75.75 0 0 1 .721.544l.813 2.846a3.75 3.75 0 0 0 2.576 2.576l2.846.813a.75.75 0 0 1 0 1.442l-2.846.813a3.75 3.75 0 0 0-2.576 2.576l-.813 2.846a.75.75 0 0 1-1.442 0l-.813-2.846a3.75 3.75 0 0 0-2.576-2.576l-2.846-.813a.75.75 0 0 1 0-1.442l2.846-.813a3.75 3.75 0 0 0 2.576-2.576l.813-2.846A.75.75 0 0 1 9 4.5ZM9 6a.75.75 0 0 1 .75.75V15a.75.75 0 0 1-1.5 0V6.75A.75.75 0 0 1 9 6Z" />
-              </svg>
-            </div>
+            <%# --- 変更点: shadow-sm を削除 --- %>
+            <%= image_tag "ai_concierge_icon.png", class: "w-8 h-8 rounded-full object-cover flex-shrink-0", alt: "AI Icon" %>
             
             <div class="max-w-[90%]">
               <% suggestion = parse_spot_suggestion(message.response) %>
@@ -163,4 +158,3 @@
   </div>
 
 </div>
-
