@@ -9,7 +9,12 @@ class UserMailer < ApplicationMailer
     @trip = params[:trip]
     @inviter = params[:inviter]
     @token = params[:invitation_token]
-    @invitation_url = invitation_accept_url(token: @token)
+    @invitation_url = invitation_accept_url(
+      token: @token,
+      host: ActionMailer::Base.default_url_options[:host],
+      protocol: ActionMailer::Base.default_url_options[:protocol]
+    )
+
     mail(
       to: params[:to], 
       subject: "【TripConcierge】#{@inviter.nickname}さんから旅の招待状が届いています"
