@@ -1,91 +1,80 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style>
+      /* Email styles need to be inline */
+    </style>
+  </head>
+
+  <body>
+    <!DOCTYPE html>
+<html>
 <head>
   <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* Webフォントの読み込み */
-    @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Merriweather:wght@300;400;700&display=swap');
     body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
     img { border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
   </style>
 </head>
-<body style="background-color: #e0e0e0; margin: 0; padding: 40px 0; font-family: 'Merriweather', 'Times New Roman', serif;">
+<body style="background-color: #f3f4f6; margin: 0; padding: 40px 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
 
   <div style="max-width: 600px; margin: 0 auto; padding: 0 20px;">
-    
-    <%# --- メインカード --- %>
-    <div style="background-color: #1a237e; border: 4px double #d4af37; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
-      
-      <%# ヘッダー %>
-      <div style="padding: 40px 20px 20px; text-align: center; border-bottom: 1px solid rgba(212, 175, 55, 0.3);">
-        <div style="font-size: 24px; color: #d4af37; margin-bottom: 10px;">⚜️ ════════════ ⚜️</div>
-        <h1 style="font-family: 'Great Vibes', cursive; color: #d4af37; margin: 0; font-size: 48px; font-weight: normal; letter-spacing: 2px; line-height: 1.2;">
-          Trip Invitation
-        </h1>
-        <p style="color: #f0e68c; margin: 10px 0 0; font-size: 16px; font-style: italic;">
-          旅への誘い
-        </p>
+
+    <div style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+
+      <div style="background: linear-gradient(135deg, #3b82f6 0%, #764ba2 100%); padding: 32px 20px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 1px;">Trip Invitation</h1>
+        <p style="color: #e0e7ff; margin: 5px 0 0; font-size: 14px;">旅程への招待のお知らせ</p>
       </div>
 
-      <%# コンテンツ %>
-      <div style="padding: 30px 40px; text-align: center; color: #f8f8f8;">
-        
-        <h2 style="font-family: 'Great Vibes', cursive; margin: 0 0 20px; font-size: 36px; color: #d4af37; font-weight: normal;">
-          <%= @inviter.nickname %>
+      <div style="padding: 32px 24px; text-align: center; color: #333333;">
+
+        <h2 style="margin: 0 0 24px; font-size: 20px; color: #1f2937;">
+          <span style="color: #764ba2;">Daigo</span> 様より<br>
+          旅程の招待状が届いています
         </h2>
-        
-        <%# ▼▼▼ 修正箇所: 「親愛なるあなたへ」を削除し、文言を調整 ▼▼▼ %>
-        <p style="font-size: 18px; line-height: 1.8; margin-bottom: 30px;">
-          素敵な旅の計画にご招待いたします。<br>
-          共に素晴らしい思い出を作りましょう。
+
+        <p style="font-size: 15px; line-height: 1.6; margin-bottom: 32px; color: #4b5563;">
+          以下の旅程共有に招待されました。<br>
+          リンクより詳細をご確認の上、ご参加ください。
         </p>
 
-        <%# 旅程詳細ボックス %>
-        <div style="background-color: rgba(0, 0, 51, 0.3); border: 2px solid #d4af37; border-radius: 4px; padding: 25px; margin-bottom: 35px; text-align: center;">
-          <p style="margin: 0 0 15px; font-size: 14px; color: #d4af37; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">— Trip Details —</p>
-          <h3 style="margin: 0 0 20px; font-size: 28px; color: #f0e68c; font-family: 'Great Vibes', cursive; font-weight: normal;">
-            <%= @trip.title %>
-          </h3>
-          <div style="display: table; width: 100%; border-top: 1px solid rgba(212, 175, 55, 0.3); padding-top: 15px;">
-            <div style="display: table-cell; width: 50%; border-right: 1px solid rgba(212, 175, 55, 0.3);">
-              <p style="margin: 0 0 5px; font-size: 12px; color: #d4af37; text-transform: uppercase;">Start Date</p>
-              <p style="margin: 0; font-size: 16px; color: #ffffff;">
-                <%= @trip.start_date&.strftime("%Y.%m.%d") || "未定" %>
-              </p>
-            </div>
-            <div style="display: table-cell; width: 50%; padding-left: 15px;">
-              <p style="margin: 0 0 5px; font-size: 12px; color: #d4af37; text-transform: uppercase;">Theme</p>
-              <p style="margin: 0; font-size: 16px; color: #ffffff;">
-                <%= @trip.travel_theme || "未設定" %>
-              </p>
-            </div>
-          </div>
+        <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 20px; margin-bottom: 32px; text-align: left;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr>
+              <td width="30%" style="padding-bottom: 8px; font-size: 12px; color: #6b7280; font-weight: bold;">旅程名</td>
+              <td style="padding-bottom: 8px; font-size: 15px; color: #111827; font-weight: bold;">テスト①</td>
+            </tr>
+            <tr>
+              <td style="padding-bottom: 8px; font-size: 12px; color: #6b7280; font-weight: bold;">開始日</td>
+              <td style="padding-bottom: 8px; font-size: 15px; color: #111827;">2025年11月08日</td>
+            </tr>
+            <tr>
+              <td style="font-size: 12px; color: #6b7280; font-weight: bold;">テーマ</td>
+              <td style="font-size: 15px; color: #111827;">食体験重視</td>
+            </tr>
+          </table>
         </div>
 
-        <p style="font-size: 16px; line-height: 1.6; margin-bottom: 30px; font-style: italic;">
-          ご参加を心よりお待ちしております。
-        </p>
-
-        <%# ボタン %>
         <div>
-          <%= link_to invitation_url(@token), style: "display: inline-block; background-color: #d4af37; color: #1a237e; text-decoration: none; padding: 16px 40px; border-radius: 4px; font-weight: bold; font-size: 18px; border: 1px solid #b08d2f; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: all 0.3s; font-family: 'Merriweather', serif;" do %>
+          <a style="display: inline-block; background: linear-gradient(to right, #3b82f6, #764ba2); color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 4px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(118, 75, 162, 0.3); transition: transform 0.2s;" href="http://localhost:3000/invitations/1z9sZR3h-ePyV48SSAUJDm3WlQpx2cix">
             旅程に参加する
-          <% end %>
-        </div>
-        
-        <div style="font-size: 24px; color: #d4af37; margin-top: 30px;">⚜️ ════════════ ⚜️</div>
+</a>        </div>
+
       </div>
 
-      <%# フッター %>
-      <div style="background-color: rgba(0, 0, 0, 0.2); padding: 20px; text-align: center; border-top: 1px solid rgba(212, 175, 55, 0.3);">
-        <p style="margin: 0; font-size: 12px; color: #b0c4de;">
-          Cordially yours,<br>
-          TripConcierge
+      <div style="background-color: #f3f4f6; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
+        <p style="margin: 0; font-size: 12px; color: #9ca3af;">
+          TripConcierge<br>
+          ※心当たりのない場合は、このメールを破棄してください。
         </p>
       </div>
 
     </div>
   </div>
 </body>
+</html>
+  </body>
 </html>
