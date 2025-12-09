@@ -8,6 +8,9 @@ class TripsController < ApplicationController
   # ▼ 3. 旅程データをセット（招待メール送信 invite も含めます）
   before_action :set_trip, only: [:show, :edit, :update, :destroy, :sharing, :invite]
 
+  # ▼ Renderのヘルスチェックが通るように、indexアクションでは basic_auth をスキップします
+  skip_before_action :basic_auth, only: [:index], if: -> { Rails.env.production? }
+
   def index
     @trips = Trip.shared_with_user(current_user)
   end
