@@ -9,8 +9,7 @@ class TripInvitation < ApplicationRecord
   validates :role, presence: true
   
   # 作成時にトークンと有効期限をセット
-  before_validation :generate_token, on: :create
-  before_create :set_expiration
+  before_validation :generate_token, :set_expiration,, on: :create
 
   # --- 判定メソッド ---
 

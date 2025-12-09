@@ -32,7 +32,7 @@
       <div style="padding: 32px 24px; text-align: center; color: #333333;">
 
         <h2 style="margin: 0 0 24px; font-size: 20px; color: #1f2937;">
-          <span style="color: #764ba2;">Daigo</span> 様より<br>
+          <span style="color: #764ba2;"><%= @inviter.nickname %></span> 様より<br>
           旅程の招待状が届いています
         </h2>
 
@@ -45,23 +45,25 @@
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
               <td width="30%" style="padding-bottom: 8px; font-size: 12px; color: #6b7280; font-weight: bold;">旅程名</td>
-              <td style="padding-bottom: 8px; font-size: 15px; color: #111827; font-weight: bold;">テスト①</td>
+              <td style="padding-bottom: 8px; font-size: 15px; color: #111827; font-weight: bold;"><%= @trip.title %></td>
             </tr>
             <tr>
               <td style="padding-bottom: 8px; font-size: 12px; color: #6b7280; font-weight: bold;">開始日</td>
-              <td style="padding-bottom: 8px; font-size: 15px; color: #111827;">2025年11月08日</td>
+              <td style="padding-bottom: 8px; font-size: 15px; color: #111827;"><%= @trip.start_date.strftime("%Y年%m月%d日") if @trip.start_date.present? %></td>
             </tr>
             <tr>
               <td style="font-size: 12px; color: #6b7280; font-weight: bold;">テーマ</td>
-              <td style="font-size: 15px; color: #111827;">食体験重視</td>
+              <td style="font-size: 15px; color: #111827;"><%= @trip.travel_theme %></td>
             </tr>
           </table>
         </div>
 
         <div>
-          <a style="display: inline-block; background: linear-gradient(to right, #3b82f6, #764ba2); color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 4px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(118, 75, 162, 0.3); transition: transform 0.2s;" href="http://localhost:3000/invitations/1z9sZR3h-ePyV48SSAUJDm3WlQpx2cix">
+          <%# 🚨 修正: リンクを動的に生成し、トークンを含めます %>
+          <a style="display: inline-block; background: linear-gradient(to right, #3b82f6, #764ba2); color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 4px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(118, 75, 162, 0.3); transition: transform 0.2s;" href="<%= invitation_accept_url(@token) %>">
             旅程に参加する
-</a>        </div>
+          </a>
+        </div>
 
       </div>
 
@@ -71,6 +73,7 @@
           ※心当たりのない場合は、このメールを破棄してください。
         </p>
       </div>
+
 
     </div>
   </div>
