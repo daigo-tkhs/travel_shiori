@@ -2,6 +2,8 @@ class InvitationsController < ApplicationController
 
   # GET /invitations/:token
   def accept
+    @hide_header = true
+    @hide_footer = true
     # URLのトークンから招待データを検索
     @invitation = TripInvitation.find_by(token: params[:token])
 

@@ -38,7 +38,9 @@
       </main>
 
       <%# フッター %>
-      <%= render 'shared/footer' %>
+      <% unless @hide_footer %>
+        <%= render "shared/footer" %>
+      <% end %>
     </div>
 
   </body>
