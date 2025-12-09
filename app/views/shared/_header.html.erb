@@ -1,23 +1,47 @@
-<%# app/views/shared/_header.html.erb %>
-<header class="bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md sticky top-0 z-50">
-  <div class="px-4 py-3 flex justify-between items-center">
-    
-    <div class="logo-area font-bold text-xl tracking-wider">
-      <%= link_to root_path, class: "flex items-center gap-2 hover:opacity-80 transition" do %>
-        <span class="text-2xl">✈️</span>
-        <span>TravelShiori</span>
-      <% end %>
-    </div>
+<header class="bg-gradient-to-r from-purple-600 to-blue-500 shadow-md sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16">
+      <%# 左側: ロゴとアプリ名 %>
+      <div class="flex-shrink-0 flex items-center">
+        <%# リンク全体に group クラスがついています %>
+        <%= link_to root_path, class: "flex items-center gap-3 group text-decoration-none" do %>
+          
+          <%# ロゴ画像エリア %>
+          <%# ▼▼▼ 修正箇所: 背景色(bg-white/10)と枠線関連のクラスを削除し、ホバー時の透明度調整を追加 ▼▼▼ %>
+          <div class="flex items-center justify-center group-hover:opacity-90 transition">
+            <% if Rails.application.assets.find_asset('logo.png') %>
+              <%= image_tag "logo.png", class: "h-12 w-auto object-contain", alt: "TripConcierge Logo" %>
+            <% else %>
+              <%# 仮アイコン %>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-9 h-9 text-white">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+              </svg>
+            <% end %>
+          </div>
+          
+          <%# アプリ名（変更なし） %>
+          <span class="text-xl font-bold text-white tracking-tight group-hover:opacity-90 transition">
+            TripConcierge
+          </span>
+        <% end %>
+      </div>
+  
 
-    <nav class="text-sm font-medium">
-      <% if user_signed_in? %>
-        <%= link_to "ログアウト", destroy_user_session_path, data: { "turbo-method": :delete }, class: "text-white hover:bg-white/20 px-3 py-1.5 rounded transition border border-white/30" %>
-      <% else %>
-        <div class="flex gap-3 items-center">
-          <%= link_to "ログイン", new_user_session_path, class: "text-white hover:underline" %>
-          <%= link_to "新規登録", new_user_registration_path, class: "text-white border border-white/50 px-3 py-1.5 rounded hover:bg-white/10 transition" %>
-        </div>
-      <% end %>
-    </nav>
+      <%# 右側: ログイン/ログアウトボタン（変更なし） %>
+      <div class="flex items-center">
+        <% if user_signed_in? %>
+          <%# ▼▼▼ 修正: classの先頭に "cursor-pointer" を追加 ▼▼▼ %>
+          <%= button_to destroy_user_session_path, method: :delete, class: "cursor-pointer ml-4 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-600 focus:ring-white shadow-sm transition" do %>
+            ログアウト
+          <% end %>
+        <% else %>
+          <div class="space-x-4">
+            <%= link_to "ログイン", new_user_session_path, class: "text-white hover:text-gray-100 font-bold text-sm transition" %>
+            <%= link_to "新規登録", new_user_registration_path, class: "px-4 py-2 border border-white rounded-md text-sm font-bold text-white hover:bg-white hover:text-blue-600 transition" %>
+          </div>
+        <% end %>
+      </div>
+
+    </div>
   </div>
 </header>
