@@ -46,6 +46,7 @@ class Trip < ApplicationRecord
   end
 
   def favorited_by?(user)
+    return false if user.nil? # ★この行を追加！ゲストなら「お気に入り」判定をfalseにする
     favorites.exists?(user_id: user.id)
   end
 

@@ -1,6 +1,12 @@
 class TripsController < ApplicationController
-  before_action :authenticate_user!
-  before_action :set_trip, only: [:show, :edit, :update, :destroy, :sharing]
+  # ▼ 1. まず show アクションのログイン制限を「明示的に解除」します（親クラスの設定を無視）
+  skip_before_action :authenticate_user!, only: [:show], raise: false
+  
+  # ▼ 2. その後で、show 以外のアクションにはログインを必須にします
+  before_action :authenticate_user!, except: [:show]
+
+  # ▼ 3. 旅程データをセット（招待メール送信 invite も含めます）
+  before_action :set_trip, only: [:show, :edit, :update, :destroy, :sharing, :invite]
 
   def index
     @trips = Trip.shared_with_user(current_user)
@@ -42,7 +48,6 @@ class TripsController < ApplicationController
     # --- 日ごとの集計 (ハッシュを作成) ---
     # 例: { 1 => { cost: 5000, time: 180 }, 2 => ... }
     @daily_stats = @spots.group_by(&:day_number).transform_values do |day_spots|
-      # 修正: .to_i を追加して nil を 0 に変換
       cost = day_spots.sum { |s| s.estimated_cost.to_i }
       stay = day_spots.sum { |s| s.duration.to_i }
       travel = day_spots.sum { |s| s.travel_time.to_i }
@@ -54,7 +59,7 @@ class TripsController < ApplicationController
       }
     end
     
-    # 終了日の計算（変更なし）
+    # 終了日の計算
     max_day = @trip.spots.maximum(:day_number) || 1
     @end_date = @trip.start_date ? @trip.start_date + (max_day - 1).days : nil
   end
@@ -87,7 +92,7 @@ class TripsController < ApplicationController
   end
 
   def invite
-    @trip = Trip.find(params[:id])
+    # set_trip で @trip は取得済み
     
     # 招待データを作成
     @invitation = @trip.trip_invitations.new(
@@ -101,7 +106,7 @@ class TripsController < ApplicationController
         to: @invitation.email,
         trip: @trip,
         inviter: current_user,
-        invitation_token: @invitation.token # ★重要: トークンを渡す
+        invitation_token: @invitation.token
       ).invite_to_trip.deliver_later
 
       redirect_to sharing_trip_path(@trip), notice: "#{params[:email]} に招待状を送信しました。"
@@ -117,8 +122,23 @@ class TripsController < ApplicationController
   end
 
   def set_trip
-    @trip = Trip.shared_with_user(current_user).find(params[:id])
-  rescue ActiveRecord::RecordNotFound
-    redirect_to root_path, alert: "指定された旅程が見つからないか、アクセス権がありません。"
+
+    # 1. ログインしている場合
+    if user_signed_in?
+      @trip = Trip.shared_with_user(current_user).find_by(id: params[:id])
+    end
+
+    # 2. ログインしていない、または見つからない場合 -> ゲスト権限をチェック
+    # to_i して型を合わせているか確認
+    if @trip.nil? && session[:guest_trip_ids]&.include?(params[:id].to_i)
+      @trip = Trip.find_by(id: params[:id])
+      Rails.logger.debug "✅ ゲスト権限で旅程を発見しました"
+    end
+
+    # それでも見つからない場合
+    if @trip.nil?
+      Rails.logger.debug "❌ 旅程が見つからない、または権限がありません -> ルートへリダイレクト"
+      redirect_to root_path, alert: "指定された旅程が見つからないか、アクセス権がありません。"
+    end
   end
 end

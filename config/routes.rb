@@ -37,6 +37,8 @@ Rails.application.routes.draw do
 
   get '/invitations/:token', to: 'invitations#accept', as: :invitation
 
+  post '/invitations/:token/guest', to: 'invitations#accept_guest', as: :accept_guest_invitation
+  
   # 開発環境でのみメール確認画面を有効化
   if Rails.env.development?
     mount LetterOpenerWeb::Engine, at: "/letter_opener"

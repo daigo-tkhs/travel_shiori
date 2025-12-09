@@ -1,0 +1,64 @@
+<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+  <div class="sm:mx-auto sm:w-full sm:max-w-md">
+    <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+      招待を受け取る
+    </h2>
+    <p class="mt-2 text-center text-sm text-gray-600">
+      以下の旅程への招待が届いています
+    </p>
+  </div>
+
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      
+      <%# 旅程情報カード %>
+      <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-6 text-center">
+        <h3 class="text-lg font-bold text-gray-800"><%= @invitation.trip.title %></h3>
+        <p class="text-sm text-gray-500 mt-1">
+          権限: <span class="font-bold"><%= @invitation.role == 'editor' ? '編集者' : '閲覧者' %></span>
+        </p>
+        <p class="text-xs text-gray-400 mt-2">
+          有効期限: <%= @invitation.expires_at.strftime("%Y/%m/%d %H:%M") %>
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        <%# 1. ログイン/登録して参加ボタン %>
+        <%= button_to new_user_session_path, method: :get, params: { invitation_token: @invitation.token }, class: "w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition" do %>
+          ログイン / 新規登録して参加
+        <% end %>
+
+        <%# 2. ゲスト閲覧ボタン（閲覧権限の場合のみ表示） %>
+        <% if @invitation.role == 'viewer' %>
+          <div class="relative py-2">
+            <div class="absolute inset-0 flex items-center">
+              <div class="w-full border-t border-gray-300"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+              <span class="px-2 bg-white text-gray-500">または</span>
+            </div>
+          </div>
+          
+          <%= button_to accept_guest_invitation_path(@invitation.token), method: :post, class: "w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition cursor-pointer" do %>
+            登録せずにゲストとして閲覧
+          <% end %>
+          
+          <p class="text-xs text-center text-gray-400 mt-2">
+            ※ゲスト閲覧はブラウザを閉じると終了します
+          </p>
+        <% else %>
+          <div class="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+            <div class="flex">
+              <div class="ml-3">
+                <p class="text-xs text-yellow-700">
+                  編集権限での参加には、アカウント登録（ログイン）が必要です。
+                </p>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+    </div>
+  </div>
+</div>
