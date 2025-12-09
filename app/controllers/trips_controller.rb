@@ -88,15 +88,25 @@ class TripsController < ApplicationController
 
   def invite
     @trip = Trip.find(params[:id])
-    target_email = params[:email]
-    if target_email.present?
-      # メール送信
-      UserMailer.with(to: target_email, trip: @trip, inviter: current_user).invite_to_trip.deliver_later
-      # 共有画面にリダイレクト
-      redirect_to sharing_trip_path(@trip), notice: "#{target_email} に招待状を送信しました！"
+    
+    # 招待データを作成
+    @invitation = @trip.trip_invitations.new(
+      email: params[:email],
+      role: params[:role] || 'viewer'
+    )
+
+    if @invitation.save
+      # DB保存に成功したら、トークン付きURLのための情報を渡してメール送信
+      UserMailer.with(
+        to: @invitation.email,
+        trip: @trip,
+        inviter: current_user,
+        invitation_token: @invitation.token # ★重要: トークンを渡す
+      ).invite_to_trip.deliver_later
+
+      redirect_to sharing_trip_path(@trip), notice: "#{params[:email]} に招待状を送信しました。"
     else
-      # メールアドレスが空の場合
-      redirect_to sharing_trip_path(@trip), alert: "メールアドレスを入力してください。"
+      redirect_to sharing_trip_path(@trip), alert: "招待の送信に失敗しました: #{@invitation.errors.full_messages.join(', ')}"
     end
   end
 

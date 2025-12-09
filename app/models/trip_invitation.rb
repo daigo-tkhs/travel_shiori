@@ -1,0 +1,43 @@
+class TripInvitation < ApplicationRecord
+  belongs_to :trip
+
+  # 権限定義（TripUserと合わせる想定ですが、ここではシンプルに定義）
+  # 0: 閲覧者, 1: 編集者
+  enum role: { viewer: 0, editor: 1 }
+
+  validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :role, presence: true
+  
+  # 作成時にトークンと有効期限をセット
+  before_validation :generate_token, on: :create
+  before_create :set_expiration
+
+  # --- 判定メソッド ---
+
+  # 有効期限切れか？
+  def expired?
+    expires_at < Time.current
+  end
+
+  # すでに使用済み（参加済み）か？
+  def accepted?
+    accepted_at.present?
+  end
+
+  # 有効な招待状か？
+  def valid_invitation?
+    !expired? && !accepted?
+  end
+
+  private
+
+  def generate_token
+    # URLで安全に使えるランダムな文字列（32文字程度）を生成
+    self.token = SecureRandom.urlsafe_base64(24)
+  end
+
+  def set_expiration
+    # 有効期限を7日後に設定
+    self.expires_at = 7.days.from_now
+  end
+end

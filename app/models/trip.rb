@@ -19,6 +19,7 @@ class Trip < ApplicationRecord
   has_many :checklist_items, dependent: :destroy
   has_many :trip_users, dependent: :destroy
   has_many :users, through: :trip_users
+  has_many :trip_invitations, dependent: :destroy
   
   # お気に入り機能
   has_many :favorites, dependent: :destroy

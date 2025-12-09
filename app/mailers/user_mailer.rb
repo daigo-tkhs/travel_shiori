@@ -7,7 +7,8 @@ class UserMailer < ApplicationMailer
   def invite_to_trip
     @trip = params[:trip]
     @inviter = params[:inviter]
-    
+    @token = params[:invitation_token] # ★追加
+
     mail(
       to: params[:to], 
       subject: "【TripConcierge】#{@inviter.nickname}さんから旅の招待状が届いています"

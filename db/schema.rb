@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_12_06_055549) do
+ActiveRecord::Schema[7.1].define(version: 2025_12_09_040054) do
   create_table "checklist_items", charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "name"
     t.boolean "is_checked", default: false, null: false
@@ -57,6 +57,19 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_06_055549) do
     t.index ["trip_id"], name: "index_spots_on_trip_id"
   end
 
+  create_table "trip_invitations", charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
+    t.bigint "trip_id", null: false
+    t.string "email", null: false
+    t.integer "role", default: 0, null: false
+    t.string "token", null: false
+    t.datetime "accepted_at"
+    t.datetime "expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["token"], name: "index_trip_invitations_on_token", unique: true
+    t.index ["trip_id"], name: "index_trip_invitations_on_trip_id"
+  end
+
   create_table "trip_users", charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.bigint "trip_id", null: false
     t.bigint "user_id", null: false
@@ -98,6 +111,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_06_055549) do
   add_foreign_key "messages", "trips"
   add_foreign_key "messages", "users"
   add_foreign_key "spots", "trips"
+  add_foreign_key "trip_invitations", "trips"
   add_foreign_key "trip_users", "trips"
   add_foreign_key "trip_users", "users"
 end
