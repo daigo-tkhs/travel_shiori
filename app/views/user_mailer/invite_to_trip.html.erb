@@ -60,7 +60,7 @@
 
         <div>
           <%# 🚨 修正: リンクを動的に生成し、トークンを含めます %>
-          <a style="display: inline-block; background: linear-gradient(to right, #3b82f6, #764ba2); color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 4px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(118, 75, 162, 0.3); transition: transform 0.2s;" href="<%= invitation_accept_url(@token) %>">
+          <a style="display: inline-block; background: linear-gradient(to right, #3b82f6, #764ba2); color: #ffffff; text-decoration: none; padding: 14px 40px; border-radius: 4px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 6px -1px rgba(118, 75, 162, 0.3); transition: transform 0.2s;" href="<%= @invitation_url %>">
             旅程に参加する
           </a>
         </div>
