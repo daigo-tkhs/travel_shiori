@@ -4,12 +4,10 @@
       
       <%# 左側: ロゴとアプリ名 %>
       <div class="flex-shrink-0 flex items-center">
-        <%# リンク全体に group クラスがついています %>
         <%= link_to root_path, class: "flex items-center gap-3 group text-decoration-none" do %>
           
           <%# ロゴ画像エリア %>
           <div class="flex items-center justify-center group-hover:opacity-90 transition">
-            <%# ▼▼▼ 修正: 仮アイコン(SVG)を削除し、image_tagのみにしました ▼▼▼ %>
             <%= image_tag "logo.png", class: "h-12 w-auto object-contain", alt: "TripConcierge Logo" %>
           </div>
           
@@ -20,8 +18,9 @@
         <% end %>
       </div>
 
-      <%# 右側: ログイン/ログアウトボタン %>
-      <div class="flex items-center">
+      <%# 右側: ログイン/ログアウトボタン (モバイルでは非表示) %>
+      <%# hidden: デフォルト (モバイル) で非表示 / sm:flex: smブレークポイント以上で表示 %>
+      <div class="hidden sm:flex items-center">
         <% if user_signed_in? %>
           <%# ログアウトボタン %>
           <%= button_to destroy_user_session_path, method: :delete, class: "cursor-pointer ml-4 px-4 py-2 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-600 focus:ring-white shadow-sm transition" do %>
