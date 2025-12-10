@@ -59,6 +59,7 @@
         <% end %>
       </div>
     <% else %>
+      <%# 旅程がない場合の表示 %>
       <div class="flex flex-col items-center justify-center py-16 px-6 bg-white rounded-xl border-2 border-dashed border-gray-200 mt-8">
         <div class="mb-4 inline-flex p-4 bg-blue-50 rounded-full text-blue-500">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
@@ -68,17 +69,19 @@
         <h3 class="text-lg font-bold text-gray-900 mb-1">旅程を作成しましょう</h3>
         <p class="text-sm text-gray-500 mb-6 text-center">AIと一緒に、あなただけの<br>旅行プランを作りませんか？</p>
         
+        <%# 旅程がない場合も同じボタンを表示 %>
         <div class="fixed bottom-24 left-0 w-full z-30 pointer-events-none">
           <div class="w-full max-w-md md:max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto relative px-4">
-            <div class="mb-6 text-right">
-              <%# rounded-2xl に変更（程よい角丸） %>
-              <%= link_to new_trip_path, class: "pointer-events-auto inline-flex items-center px-6 py-3 border border-transparent text-base font-bold rounded-2xl text-white bg-gradient-to-r from-purple-600 to-blue-500 bg-no-repeat hover:from-purple-700 hover:to-blue-600 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1" do %>
-                <svg class="-ml-1 mr-2 h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <%# ▼▼▼ 修正: 詳細画面と同じカプセル型デザインに変更 ▼▼▼ %>
+            <%= link_to new_trip_path, class: "absolute right-4 bottom-0 pointer-events-auto group z-30" do %>
+              <div class="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-40 group-hover:opacity-60 transition duration-200"></div>
+              <div class="relative bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full shadow-xl flex items-center gap-2 px-5 py-3.5 transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
-                新しい旅程を作成
-              <% end %>
-            </div>
+                <span class="font-bold text-sm tracking-wide">新しい旅程を作成</span>
+              </div>
+            <% end %>
           </div>
         </div>
 
@@ -86,19 +89,20 @@
     <% end %>
   </div>
 
-  <%# FAB: レスポンシブコンテナ内に配置 %>
+  <%# FAB: 旅程がある場合 %>
   <% if @trips.any? %>
     <div class="fixed bottom-24 left-0 w-full z-30 pointer-events-none">
       <div class="w-full max-w-md md:max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto relative px-4">
-        <div class="mb-6 text-right">
-          <%# rounded-2xl に変更 %>
-          <%= link_to new_trip_path, class: "pointer-events-auto inline-flex items-center px-6 py-3 border border-transparent text-base font-bold rounded-2xl text-white bg-gradient-to-r from-purple-600 to-blue-500 bg-no-repeat hover:from-purple-700 hover:to-blue-600 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1" do %>
-            <svg class="-ml-1 mr-2 h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <%# ▼▼▼ 修正: 詳細画面と同じカプセル型デザインに変更 ▼▼▼ %>
+        <%= link_to new_trip_path, class: "absolute right-4 bottom-0 pointer-events-auto group z-30" do %>
+          <div class="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-40 group-hover:opacity-60 transition duration-200"></div>
+          <div class="relative bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full shadow-xl flex items-center gap-2 px-5 py-3.5 transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
+            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
-            新しい旅程を作成
-          <% end %>
-        </div>
+            <span class="font-bold text-sm tracking-wide">新しい旅程を作成</span>
+          </div>
+        <% end %>
       </div>
     </div>
   <% end %>
