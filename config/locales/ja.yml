@@ -1,4 +1,4 @@
-# config/locales/ja.yml
+# config/locales/ja.yml (最終版)
 
 ja:
   messages:
@@ -11,7 +11,8 @@ ja:
       delete_permission_denied: "旅程を削除する権限がありません。"
       clone_success: "旅程を複製しました！"
       not_found: "指定された旅程が見つからないか、アクセス権がありません。"
-
+      not_found_simple: "指定された旅程が見つかりません。" # <--- 追記
+    
     spot:
       create_success: "スポットを追加しました！"
       update_success: "スポットを更新しました。"
@@ -21,7 +22,10 @@ ja:
       
     checklist:
       import_success: "持ち物リストを自動生成しました！"
-      
+      create_success: "「%{name}」を追加しました。" # <--- 追記
+      delete_success: "「%{name}」を削除しました。" # <--- 追記
+      item_not_found: "チェックリストアイテムが見つかりません。" # <--- 追記
+
     user_message:
       create_failure: "メッセージを入力してください。"
       delete_success: "メッセージを削除しました。"
@@ -30,7 +34,8 @@ ja:
     ai:
       response_text_not_found: "AIからの応答テキストが見つかりませんでした。"
       no_valid_response: "AIからの有効な応答がありませんでした。"
-      
+      communication_error: "AIとの通信に失敗しました: %{error}" # MessagesControllerで定義済み
+
     favorite:
       create_success: "お気に入りに登録しました"
       create_failure: "登録に失敗しました"
@@ -49,6 +54,10 @@ ja:
       delete_permission_denied: "メンバーを削除する権限がありません。"
       member_not_found: "旅程メンバーが見つかりません。"
       view_permission_denied: "この旅程を閲覧する権限がありません。"
+      leave_success: "%{trip_title} の旅程から離脱しました。" # <--- 追記
+      welcome_existing: "旅程「%{trip_title}」へようこそ！" # <--- 追記
+      join_success: "旅程「%{trip_title}」に参加しました！" # <--- 追記
+      delete_success: "%{user_name} を旅程から削除しました。" # <--- 追記
       
     mail:
       welcome_subject: "【TripConcierge】ようこそ！旅の準備を始めましょう"
