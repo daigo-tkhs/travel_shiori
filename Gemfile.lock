@@ -384,7 +384,7 @@ DEPENDENCIES
   gemini-ai (~> 4.3)
   geocoder (~> 1.8)
   google_maps_service
-  image_processing (~> 1.14)
+  image_processing (~> 1.2)
   importmap-rails
   jbuilder
   letter_opener_web
