@@ -51,7 +51,8 @@
             </div>
           </div>
           
-          <%= button_to accept_guest_invitation_path(token: @invitation.token), method: :post, class: "w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition" do %>
+          <%# ▼▼▼ 修正: cursor-pointer をクラスの先頭に追加し、ボタンの挙動をリンクに合わせました ▼▼▼ %>
+          <%= button_to accept_guest_invitation_path(token: @invitation.token), method: :post, class: "cursor-pointer w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition" do %>
             登録せずにゲストとして閲覧
           <% end %>
           
