@@ -7,7 +7,7 @@
   <%# ロゴとアプリ名 %>
   <div class="sm:mx-auto sm:w-full sm:max-w-md text-center mb-6">
     <div class="flex justify-center items-center gap-3 mb-2">
-      <% if Rails.application.assets.find_asset('logo.png') %>
+      <% if Rails.application.assets.present? && Rails.application.assets.find_asset('logo.png').present? %>
         <%= image_tag "logo.png", class: "h-14 w-auto object-contain", alt: "TripConcierge Logo" %>
       <% else %>
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 text-white">
