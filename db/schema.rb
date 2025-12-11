@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_12_10_131705) do
+ActiveRecord::Schema[7.1].define(version: 2025_12_11_051838) do
   create_table "active_storage_attachments", charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -83,6 +83,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_10_131705) do
     t.integer "position"
     t.integer "travel_time"
     t.boolean "reservation_required"
+    t.integer "category"
     t.index ["trip_id"], name: "index_spots_on_trip_id"
   end
 
@@ -95,6 +96,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_10_131705) do
     t.datetime "expires_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "sender_id", null: false
+    t.index ["sender_id"], name: "index_trip_invitations_on_sender_id"
     t.index ["token"], name: "index_trip_invitations_on_token", unique: true
     t.index ["trip_id"], name: "index_trip_invitations_on_trip_id"
   end
@@ -144,6 +147,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_12_10_131705) do
   add_foreign_key "messages", "users"
   add_foreign_key "spots", "trips"
   add_foreign_key "trip_invitations", "trips"
+  add_foreign_key "trip_invitations", "users", column: "sender_id"
   add_foreign_key "trip_users", "trips"
   add_foreign_key "trip_users", "users"
 end

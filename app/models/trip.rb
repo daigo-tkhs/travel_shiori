@@ -33,6 +33,7 @@ class Trip < ApplicationRecord
   has_many :favorited_users, through: :favorites, source: :user
 
   # スコープ
+  # 所有者も trip_users に含まれる仕様（callback参照）なので、これで自分が参加/所有する旅程を全取得できる
   scope :shared_with_user, lambda { |user|
     joins(:trip_users).where(trip_users: { user_id: user.id }).distinct
   }
@@ -63,12 +64,27 @@ class Trip < ApplicationRecord
     favorites.exists?(user_id: user.id)
   end
 
-  # ▼▼▼ 修正: TripsControllerのエラー解消のため追記 ▼▼▼
-  # 最新のエラー (undefined method 'invitation_token') を解消するメソッド
-  # 共有リンクに必要なトークンを返す
   def invitation_token
     # シンプルに trip_invitations の中から最初のトークンを返す (nil許容)
     trip_invitations.first&.token
+  end
+
+  def clone_with_spots(new_owner)
+    ActiveRecord::Base.transaction do
+      # 1. 旅程本体を複製 (dupで属性をコピー)
+      new_trip = self.dup
+      new_trip.owner = new_owner
+      new_trip.title = "#{self.title} のコピー" # タイトルを変更
+      # 新しいレコードとして保存
+      new_trip.save!
+      # 2. 紐付いているスポットも複製
+      self.spots.order(:position).each do |spot|
+        new_spot = spot.dup
+        new_spot.trip = new_trip # 新しい旅程に紐付ける
+        new_spot.save!
+      end
+      new_trip
+    end
   end
   
   # コールバック
