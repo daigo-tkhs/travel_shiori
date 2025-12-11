@@ -2,6 +2,8 @@
 
 class TripInvitation < ApplicationRecord
   belongs_to :trip
+  belongs_to :sender, class_name: 'User', foreign_key: 'sender_id'
+  belongs_to :user, optional: true
 
   # 権限定義（TripUserと合わせる想定ですが、ここではシンプルに定義）
   # 0: 閲覧者, 1: 編集者
