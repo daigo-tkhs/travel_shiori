@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 class InvitationsController < ApplicationController
-  # 招待画面とゲスト参加はログイン不要
-  skip_before_action :authenticate_user!, only: %i[accept accept_guest]
+  # 修正: skip_before_action を削除し、joinアクションのみログイン必須にする設定に変更
+  before_action :authenticate_user!, only: %i[join]
+  
   before_action :set_invitation
 
   # GET /invitations/:token
@@ -18,8 +19,7 @@ class InvitationsController < ApplicationController
 
   # POST /invitations/:token/join
   def join
-    # このアクションはログイン必須
-    authenticate_user!
+    # 上記 before_action でログインチェック済み
 
     trip = @invitation.trip
 
@@ -30,11 +30,10 @@ class InvitationsController < ApplicationController
     end
 
     # メンバー追加処理
-    # TripUserのpermission_level(またはrole)に、招待状のroleをセット
     TripUser.create!(
       trip: trip,
       user: current_user,
-      role: @invitation.role # もしTripUserのカラム名がpermission_levelなら変更してください
+      role: @invitation.role
     )
 
     # 招待状を使用済みに更新
