@@ -1,7 +1,13 @@
 # frozen_string_literal: true
 
 class TripsController < ApplicationController
-  before_action :authenticate_user!
+  # ▼▼▼ 修正: showアクションの認証ルールを変更 ▼▼▼
+  # show以外は通常通りログイン必須
+  before_action :authenticate_user!, except: %i[show]
+  # showは「ログインユーザー」または「ゲスト」なら許可
+  before_action :authenticate_user_or_guest!, only: %i[show]
+  # ▲▲▲ 修正終わり ▲▲▲
+
   before_action :set_trip, only: %i[show edit update destroy sharing clone invite]
   before_action :check_trip_owner, only: %i[edit update destroy]
 
@@ -64,7 +70,8 @@ class TripsController < ApplicationController
     @trip_invitation.sender = current_user 
 
     if @trip_invitation.save
-      UserMailer.with(invitation: @trip_invitation, inviter: current_user).invite_email.deliver_later
+      UserMailer.with(invitation: @trip_invitation, inviter: current_user).invite_email.deliver_now
+      
       redirect_to sharing_trip_path(@trip), notice: t('messages.invitation.sent_success', default: '招待状を送信しました。')
     else
       @trip_users = @trip.trip_users.includes(:user).where.not(id: nil)
@@ -82,6 +89,26 @@ class TripsController < ApplicationController
   # --- Private Methods ---
 
   private
+
+  # ▼▼▼ 追加: ゲストアクセス許可ロジック ▼▼▼
+  def authenticate_user_or_guest!
+    # ログイン済みならOK
+    return if user_signed_in?
+
+    # セッションにゲストトークンがあり、それが有効ならOK
+    if session[:guest_token]
+      invitation = TripInvitation.find_by(token: session[:guest_token])
+      # 招待状が存在し、有効期限内であり、アクセスしようとしている旅程と一致するか
+      if invitation&.valid_invitation? && invitation.trip_id.to_s == params[:id].to_s
+        @guest_invitation = invitation # set_tripで使用するために保存
+        return
+      end
+    end
+
+    # どちらもダメならログイン画面へ強制遷移
+    authenticate_user!
+  end
+  # ▲▲▲ 追加終わり ▲▲▲
 
   def prepare_trip_show_data
     @spots = @trip.spots.order(:position)
@@ -114,7 +141,16 @@ class TripsController < ApplicationController
   end
 
   def set_trip
-    @trip = Trip.shared_with_user(current_user).find(params[:id])
+    if user_signed_in?
+      # ログインユーザーの場合: 共有された旅程から検索
+      @trip = Trip.shared_with_user(current_user).find(params[:id])
+    elsif @guest_invitation
+      # ゲストの場合: 招待状に紐付く旅程を取得
+      @trip = @guest_invitation.trip
+    else
+      # ここに来ることは基本ないが、念のため
+      redirect_to root_path, alert: t('messages.trip.not_found')
+    end
   rescue ActiveRecord::RecordNotFound
     redirect_to root_path, alert: t('messages.trip.not_found')
   end
