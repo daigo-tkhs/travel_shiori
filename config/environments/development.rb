@@ -50,15 +50,15 @@ Rails.application.configure do
   config.action_mailer.smtp_settings = {
     user_name: 'apikey',
     password: ENV['SENDGRID_API_KEY'],
-    # Renderの公開ドメイン名に修正
-    domain: 'travel-shiori.onrender.com',
+    # 修正: Renderの公開ドメイン名を削除（ActionMailerのhost設定に統一）
     address: 'smtp.sendgrid.net',
     port: 587,
     authentication: :plain,
     enable_starttls_auto: true
   }
 
-  # 致命的なメールリンクの修正 (Renderの公開URLを設定)
+  # ▼▼▼ 修正: メーラー内でのURL生成エラー対策 ▼▼▼
+  # Action Mailerが絶対URLを生成するために必要
   config.action_mailer.default_url_options = { host: 'travel-shiori.onrender.com', protocol: 'https' }
 
   # Log to STDOUT by default
