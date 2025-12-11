@@ -5,14 +5,17 @@ class TripInvitation < ApplicationRecord
   belongs_to :sender, class_name: 'User', foreign_key: 'sender_id'
   belongs_to :user, optional: true
 
-  # 権限定義（TripUserと合わせる想定ですが、ここではシンプルに定義）
+  # 権限定義
   # 0: 閲覧者, 1: 編集者
   enum :role, { viewer: 0, editor: 1 }
-
+  
+  # バリデーション
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :role, presence: true
+  validates :token, presence: true, uniqueness: true
+  validates :expires_at, presence: true
 
-  # 修正: 作成時にトークンと有効期限をセット (before_validationに変更し、統合)
+  # 作成時にトークンと有効期限をセット
   before_validation :setup_invitation_data, on: :create
 
   # --- 判定メソッド ---
@@ -34,7 +37,7 @@ class TripInvitation < ApplicationRecord
 
   private
 
-  # 修正: 統合されたセットアップメソッド
+  # 統合されたセットアップメソッド
   def setup_invitation_data
     # URLで安全に使えるランダムな文字列（32文字程度）を生成
     self.token ||= SecureRandom.urlsafe_base64(24)
