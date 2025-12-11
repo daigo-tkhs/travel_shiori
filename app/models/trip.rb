@@ -21,7 +21,7 @@ class Trip < ApplicationRecord
   has_many :spots, dependent: :destroy
   has_many :messages, dependent: :destroy
   
-  # ▼▼▼ 修正: 存在しない has_one :checklist を削除しました ▼▼▼
+  # 修正済: 存在しない has_one :checklist を削除し、ChecklistItemと関連付け
   has_many :checklist_items, dependent: :destroy
   
   has_many :trip_users, dependent: :destroy
@@ -63,6 +63,10 @@ class Trip < ApplicationRecord
     favorites.exists?(user_id: user.id)
   end
 
+  def invitation_token
+    trip_invitations.first&.token
+  end
+  
   # コールバック
   after_create :set_owner_as_trip_user
 
