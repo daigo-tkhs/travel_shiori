@@ -83,7 +83,7 @@ class TripsController < ApplicationController
   end
 
   def calculate_spot_totals
-    @total_travel_time_minutes = @spots.sum(&:travel_time_from_previous)
+    @total_travel_time_minutes = @spots.sum(&:travel_time)
     @total_spot_cost = @spots.sum(&:estimated_cost)
   end
 
