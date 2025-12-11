@@ -14,6 +14,7 @@ class TripsController < ApplicationController
   end
 
   def show
+    @hide_header = true
     prepare_trip_show_data
   end
 
@@ -78,7 +79,7 @@ class TripsController < ApplicationController
 
     calculate_spot_totals
 
-    # 修正: nilが含まれていてもエラーにならないよう .to_i を使用するブロック形式に変更
+    # nilが含まれていてもエラーにならないよう .to_i を使用するブロック形式に変更
     @daily_stats = @spots.group_by(&:day_number).transform_values do |day_spots|
       {
         cost: day_spots.sum { |s| s.estimated_cost.to_i },
@@ -88,7 +89,7 @@ class TripsController < ApplicationController
 
     @has_checklist = @trip.checklist_items.any?
     
-    # 修正: ルーティングエラーとnilエラーを防止
+    # ルーティングエラーとnilエラーを防止
     token = @trip.invitation_token
     @invitation_link = token ? invitation_url(token) : nil
   end
