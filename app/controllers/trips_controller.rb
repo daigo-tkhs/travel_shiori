@@ -86,9 +86,8 @@ class TripsController < ApplicationController
   end
 
   def calculate_spot_totals
-    # 修正: SQL集計(.sum(:column))に変更し、nilが含まれていてもエラーにならないように修正
     @total_travel_time_minutes = @spots.sum(:travel_time).to_i
-    @total_spot_cost = @spots.sum(:estimated_cost).to_i
+    @total_estimated_cost = @spots.sum(:estimated_cost).to_i 
   end
 
   def set_trip
