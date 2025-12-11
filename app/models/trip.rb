@@ -20,11 +20,13 @@ class Trip < ApplicationRecord
   belongs_to :owner, class_name: 'User'
   has_many :spots, dependent: :destroy
   has_many :messages, dependent: :destroy
+  
+  # ▼▼▼ 修正: 存在しない has_one :checklist を削除しました ▼▼▼
   has_many :checklist_items, dependent: :destroy
+  
   has_many :trip_users, dependent: :destroy
   has_many :users, through: :trip_users
   has_many :trip_invitations, dependent: :destroy
-  has_one :checklist, dependent: :destroy
 
   # お気に入り機能
   has_many :favorites, dependent: :destroy
@@ -51,18 +53,15 @@ class Trip < ApplicationRecord
   end
 
   def viewable_by?(user)
+    # trip_usersが存在するかでチェック
     trip_users.exists?(user: user)
   end
 
   def favorited_by?(user)
-    return false if user.nil? # ★この行を追加！ゲストなら「お気に入り」判定をfalseにする
+    return false if user.nil? # ゲストなら「お気に入り」判定をfalseにする
 
     favorites.exists?(user_id: user.id)
   end
-
-  # def was_attached?
-  #   self.image.attached?
-  # end
 
   # コールバック
   after_create :set_owner_as_trip_user
