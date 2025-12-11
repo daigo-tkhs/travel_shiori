@@ -1,77 +1,73 @@
 # frozen_string_literal: true
 
 class InvitationsController < ApplicationController
+  # 招待画面とゲスト参加はログイン不要
+  skip_before_action :authenticate_user!, only: %i[accept accept_guest]
+  before_action :set_invitation
+
   # GET /invitations/:token
   def accept
     @hide_header = true
     @hide_footer = true
 
-    @invitation = TripInvitation.find_by(token: params[:token])
+    # 未ログインの場合、ログイン後にこの画面に戻ってくるよう保存
+    store_location_for(:user, request.fullpath) unless user_signed_in?
 
-    if @invitation.nil? || !@invitation.valid_invitation?
-      redirect_to root_path, alert: t('messages.invitation.link_invalid')
+    # 招待状が無効な場合は set_invitation でリダイレクト済み
+  end
+
+  # POST /invitations/:token/join
+  def join
+    # このアクションはログイン必須
+    authenticate_user!
+
+    trip = @invitation.trip
+
+    # すでにメンバーに参加している場合のチェック
+    if trip.trip_users.exists?(user: current_user)
+      redirect_to trip_path(trip), notice: t('messages.member.welcome_existing', trip_title: trip.title)
       return
     end
 
-    if user_signed_in?
-      process_join_trip(current_user)
-    else
-      session[:invitation_token] = @invitation.token
-      render :accept
-    end
+    # メンバー追加処理
+    # TripUserのpermission_level(またはrole)に、招待状のroleをセット
+    TripUser.create!(
+      trip: trip,
+      user: current_user,
+      role: @invitation.role # もしTripUserのカラム名がpermission_levelなら変更してください
+    )
+
+    # 招待状を使用済みに更新
+    @invitation.update!(accepted_at: Time.current, user: current_user)
+
+    redirect_to trip_path(trip), notice: t('messages.member.join_success', trip_title: trip.title)
   end
 
   # POST /invitations/:token/guest
   def accept_guest
-    @invitation = TripInvitation.find_by(token: params[:token], accepted_at: nil)
-
-    # 複雑な条件チェックを分離 (Metrics解消)
-    error_message = check_invitation_validity
-
-    unless error_message.nil?
-      redirect_to root_path, alert: error_message
+    # 編集権限の場合はゲスト参加不可（ログインを促す）
+    if @invitation.role == 'editor'
+      redirect_to invitation_path(@invitation.token), alert: t('messages.invitation.login_required')
       return
     end
 
-    # ゲスト参加処理
-    user = user_signed_in? ? current_user : User.find_or_create_guest!(@invitation.email)
-
-    if TripUser.create(trip: @invitation.trip, user: user, permission_level: @invitation.role)
-      @invitation.update(accepted_at: Time.current)
+    # 閲覧権限(viewer)の場合のみセッションにトークンを保存して閲覧許可
+    if @invitation.valid_invitation?
+      session[:guest_token] = @invitation.token
       redirect_to trip_path(@invitation.trip), notice: t('messages.invitation.guest_join_success')
     else
-      redirect_to root_path, alert: t('messages.invitation.approve_failure')
+      redirect_to root_path, alert: t('messages.invitation.link_invalid')
     end
   end
 
   private
 
-  # ユーザーを旅程に参加させる処理
-  def process_join_trip(user)
-    trip = @invitation.trip
+  def set_invitation
+    @invitation = TripInvitation.find_by(token: params[:token])
 
-    if trip.trip_users.exists?(user: user)
-      redirect_to trip_path(trip), notice: t('messages.member.welcome_existing', trip_title: trip.title)
-      return
+    # 招待状が存在しない、または有効期限切れ/使用済みの場合
+    if @invitation.nil? || !@invitation.valid_invitation?
+      redirect_to root_path, alert: t('messages.invitation.link_invalid')
     end
-
-    TripUser.create!(user: user, trip: trip, permission_level: @invitation.role)
-
-    @invitation.update!(accepted_at: Time.current)
-
-    redirect_to trip_path(trip), notice: t('messages.member.join_success', trip_title: trip.title)
-  end
-
-  # Metrics解消のため追記: 複雑な条件チェックを分離
-  def check_invitation_validity
-    return t('messages.invitation.link_invalid') unless @invitation
-
-    if @invitation.expires_at.present? && @invitation.expires_at < Time.current
-      return t('messages.invitation.link_invalid')
-    end
-
-    return t('messages.invitation.login_required') if @invitation.role == 'editor' && !user_signed_in?
-
-    nil # エラーがない場合は nil を返す
   end
 end
