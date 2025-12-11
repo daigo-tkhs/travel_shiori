@@ -12,8 +12,8 @@ class TripInvitation < ApplicationRecord
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :role, presence: true
 
-  # 作成時にトークンと有効期限をセット
-  before_validation :generate_token, :set_expiration, on: :create
+  # 修正: 作成時にトークンと有効期限をセット (before_validationに変更し、統合)
+  before_validation :setup_invitation_data, on: :create
 
   # --- 判定メソッド ---
 
@@ -34,13 +34,11 @@ class TripInvitation < ApplicationRecord
 
   private
 
-  def generate_token
+  # 修正: 統合されたセットアップメソッド
+  def setup_invitation_data
     # URLで安全に使えるランダムな文字列（32文字程度）を生成
-    self.token = SecureRandom.urlsafe_base64(24)
-  end
-
-  def set_expiration
+    self.token ||= SecureRandom.urlsafe_base64(24)
     # 有効期限を7日後に設定
-    self.expires_at = 7.days.from_now
+    self.expires_at ||= 7.days.from_now
   end
 end
