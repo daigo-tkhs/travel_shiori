@@ -64,9 +64,7 @@ class TripsController < ApplicationController
     @trip_invitation.sender = current_user 
 
     if @trip_invitation.save
-      # 修正: 同期的にメール送信を行うことで、データ保存完了後のトークンnilエラーを確実に防ぐ
-      UserMailer.with(invitation: @trip_invitation, inviter: current_user).invite_email.deliver_now
-      
+      UserMailer.with(invitation: @trip_invitation, inviter: current_user).invite_email.deliver_later
       redirect_to sharing_trip_path(@trip), notice: t('messages.invitation.sent_success', default: '招待状を送信しました。')
     else
       @trip_users = @trip.trip_users.includes(:user).where.not(id: nil)

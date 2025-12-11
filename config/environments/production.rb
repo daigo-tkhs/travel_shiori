@@ -53,7 +53,7 @@ Rails.application.configure do
     # domain設定はActionMailerが自動で処理するため、ここでは削除。
     # SendGridの推奨TLSポート587を使用
     address: 'smtp.sendgrid.net',
-    port: 587,
+    port: 2525,
     authentication: :plain,
     enable_starttls_auto: true
   }
