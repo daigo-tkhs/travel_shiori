@@ -1,4 +1,4 @@
-# app/mailers/user_mailer.rb (修正版全文)
+# app/mailers/user_mailer.rb
 # frozen_string_literal: true
 
 class UserMailer < ApplicationMailer
