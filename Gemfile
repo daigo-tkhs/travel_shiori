@@ -26,9 +26,13 @@ gem 'gemini-ai', '~> 4.3'           # AI連携 (旅程生成/タイトル命名)
 gem 'geocoder', '~> 1.8'            # 地図/位置情報 (移動時間計算の土台)
 gem 'rolify', '~> 6.0'              # 権限管理 (TripUserの権限レベル管理を支援)
 
+# Gemfile
+
 group :development, :test do
   gem 'debug', platforms: %i[mri windows]
   gem 'rspec-rails', '~> 6.0'
+  gem 'factory_bot_rails'
+  gem 'faker' 
   gem 'rubocop', require: false
   gem 'rubocop-performance', require: false
   gem 'rubocop-rails', require: false

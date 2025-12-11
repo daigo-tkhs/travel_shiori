@@ -13,5 +13,13 @@ module TravelShiori
     config.load_defaults 7.1
     config.autoload_lib(ignore: %w[assets tasks])
     config.i18n.default_locale = :ja
+
+    config.generators do |g|
+      g.test_framework :rspec,
+        fixtures: false,          # FactoryBotを使うのでfixtureは生成しない
+        view_specs: false,        # ビューのテストは生成しない
+        helper_specs: false,      # ヘルパーのテストは生成しない
+        routing_specs: false      # ルーティングのテストは生成しない
+    end
   end
 end
