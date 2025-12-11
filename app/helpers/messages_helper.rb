@@ -1,8 +1,10 @@
-# app/helpers/messages_helper.rb (全文)
+# app/helpers/messages_helper.rb (修正版全文)
 # frozen_string_literal: true
 
 module MessagesHelper
-  # AIへのシステムインストラクション（Heredoc）をコントローラーから切り離し、ClassLengthを解消
+  # ------------------------------------------------------------------
+  # 1. AIへのシステムインストラクション生成
+  # ------------------------------------------------------------------
   def build_system_instruction_for_ai
     <<~INSTRUCTION
       あなたは旅行プランニングのアシスタントです。
@@ -30,5 +32,25 @@ module MessagesHelper
       1. estimated_cost は必ず**日本円(JPY)**の数値で入力してください。（ホテルの場合は1泊1名あたりの目安）
       2. description は簡潔に魅力的な説明を入れてください。
     INSTRUCTION
+  end
+
+  # ------------------------------------------------------------------
+  # 2. AIレスポンスのパース処理 (今回追加するメソッド)
+  # ------------------------------------------------------------------
+  # AIのレスポンス(JSON文字列)をパースしてハッシュにする
+  # JSONでない場合（通常の会話）は nil を返す
+  def parse_spot_suggestion(response_text)
+    return nil if response_text.blank?
+
+    begin
+      # AIがMarkdownのコードブロック(```json ... ```)を含めてくる場合があるため除去
+      cleaned_text = response_text.to_s.gsub(/^```json\s*/, '').gsub(/\s*```$/, '')
+      
+      # JSONとしてパースを試みる
+      JSON.parse(cleaned_text)
+    rescue JSON::ParserError
+      # JSONでない場合（通常の会話テキストなど）は nil を返す
+      nil
+    end
   end
 end
