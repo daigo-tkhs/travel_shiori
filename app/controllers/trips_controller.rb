@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class TripsController < ApplicationController
-  # 【重要】set_tripのonlyリストに invite を追加
   before_action :authenticate_user!
   before_action :set_trip, only: %i[show edit update destroy sharing clone invite]
   before_action :check_trip_owner, only: %i[edit update destroy]
@@ -62,15 +61,13 @@ class TripsController < ApplicationController
 
   def invite
     @trip_invitation = @trip.trip_invitations.build(invitation_params)
-    @trip_invitation.sender = current_user # 送信者をセット (モデルに sender 関連付けが必要)
+    @trip_invitation.sender = current_user 
 
     if @trip_invitation.save
-      # メール送信処理 (UserMailerの実装に依存)
       UserMailer.with(invitation: @trip_invitation, inviter: current_user).invite_email.deliver_later
       
       redirect_to sharing_trip_path(@trip), notice: t('messages.invitation.sent_success', default: '招待状を送信しました。')
     else
-      # エラー時の再表示用データセット
       @trip_users = @trip.trip_users.includes(:user).where.not(id: nil)
       @trip_user = @trip.trip_users.build
       flash.now[:alert] = t('messages.invitation.send_failure', default: '招待の送信に失敗しました。入力内容を確認してください。')
@@ -134,6 +131,6 @@ class TripsController < ApplicationController
   end
   
   def invitation_params
-    params.require(:trip_invitation).permit(:email, :role)
+    params.permit(:email, :role)
   end
 end
