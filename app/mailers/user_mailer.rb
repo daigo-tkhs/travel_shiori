@@ -1,8 +1,15 @@
-# app/mailers/user_mailer.rb (最終確定版)
 # frozen_string_literal: true
 
 class UserMailer < ApplicationMailer
   include Rails.application.routes.url_helpers
+
+  def default_url_options
+    if Rails.env.production?
+      { host: 'travel-shiori.onrender.com', protocol: 'https' }
+    else
+      { host: 'localhost', port: 3000, protocol: 'http' }
+    end
+  end
 
   def welcome
     @greeting = 'Hi'
@@ -14,12 +21,7 @@ class UserMailer < ApplicationMailer
     @inviter = params[:inviter]
     @trip = @invitation.trip
     
-    # invitation_url の呼び出しはホスト設定があれば問題なし
-    host = Rails.env.production? ? 'travel-shiori.onrender.com' : 'localhost'
-    port = Rails.env.production? ? nil : 3000
-    protocol = Rails.env.production? ? 'https' : 'http'
-
-    @invite_url = invitation_url(@invitation.token, host: host, port: port, protocol: protocol)
+    @invite_url = invitation_url(@invitation.token)
 
     subject = t('messages.mail.invite_subject', inviter_name: @inviter.nickname || @inviter.email)
 
@@ -28,5 +30,4 @@ class UserMailer < ApplicationMailer
       subject: subject
     )
   end
-  
 end
