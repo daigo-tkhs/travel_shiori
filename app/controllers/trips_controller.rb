@@ -78,7 +78,7 @@ class TripsController < ApplicationController
 
     calculate_spot_totals
 
-    @has_checklist = @trip.checklist.present?
+    @has_checklist = @trip.checklist_items.any?
     @invitation_link = trip_invitation_url(@trip.invitation_token)
   end
 
