@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 class InvitationsController < ApplicationController
-  # 招待画面とゲスト参加はログイン不要
-  skip_before_action :authenticate_user!, only: %i[accept accept_guest]
+  before_action :authenticate_user!, only: %i[join]
+  
   before_action :set_invitation
 
   # GET /invitations/:token
@@ -12,21 +12,17 @@ class InvitationsController < ApplicationController
 
     # 未ログインの場合、ログイン後にこの画面に戻ってくるよう保存
     store_location_for(:user, request.fullpath) unless user_signed_in?
-
-    # 招待状が無効な場合は set_invitation でリダイレクト済み
   end
 
   # POST /invitations/:token/join
   def join
-    # このアクションはログイン必須
-    authenticate_user!
+    # before_action でログインチェック済み
 
-    # ▼▼▼ 追加: 招待されたメールアドレスとログインユーザーが一致するか確認 ▼▼▼
+    # 招待されたメールアドレスとログインユーザーが一致するか確認
     unless @invitation.email == current_user.email
       redirect_to root_path, alert: '招待されたメールアドレスでログインしてください。'
       return
     end
-    # ▲▲▲ 追加終わり ▲▲▲
 
     trip = @invitation.trip
 
@@ -40,11 +36,10 @@ class InvitationsController < ApplicationController
     TripUser.create!(
       trip: trip,
       user: current_user,
-      permission_level: @invitation.role
+      permission_level: @invitation.role # roleカラムがないためpermission_levelを使用
     )
 
-    # 招待状を使用済みに更新
-    # 修正: user_id カラムがないため、accepted_at のみ更新する
+    # 招待状を使用済みに更新 (user_idカラムがないためaccepted_atのみ)
     @invitation.update!(accepted_at: Time.current)
 
     redirect_to trip_path(trip), notice: t('messages.member.join_success', trip_title: trip.title)
