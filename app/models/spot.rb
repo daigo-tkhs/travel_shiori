@@ -2,16 +2,16 @@
 
 class Spot < ApplicationRecord
   belongs_to :trip
-  # NOTE: dependent: :destroy は Trip モデルに設定されている
-
   acts_as_list scope: %i[trip_id day_number]
-
   before_save :set_position, if: :new_record?
   before_save :calculate_travel_time_from_previous, if: -> { saved_change_to_latitude? || saved_change_to_longitude? }
 
   enum :category, { sightseeing: 0, restaurant: 1, accommodation: 2, other: 3 }
 
-  # ... (中略: バリデーションなど) ...
+  # バリデーション
+  validates :name, presence: true, length: { maximum: 50 }
+  validates :estimated_cost, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :travel_time, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
   private
 
