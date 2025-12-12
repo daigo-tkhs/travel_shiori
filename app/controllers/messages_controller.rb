@@ -1,4 +1,3 @@
-# app/controllers/messages_controller.rb (全文)
 # frozen_string_literal: true
 
 class MessagesController < ApplicationController
@@ -6,20 +5,27 @@ class MessagesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_trip
   before_action :set_message, only: %i[edit update destroy]
-  before_action :check_trip_edit_permission, only: %i[create destroy]
 
   def index
+    # 権限チェック: TripPolicy#show? をチェック (閲覧権限)
+    authorize @trip
+    
     @hide_header = true
     @messages = @trip.messages.order(created_at: :asc)
     @message = Message.new
   end
 
-  # ... (edit, create, update, destroy メソッドは省略/変更なし) ...
-  def edit; end
+  def edit
+    # 権限チェック: MessagePolicy#edit? をチェック
+    authorize @message
+  end
 
   def create
     @message = @trip.messages.build(message_params)
     @message.user = current_user
+    
+    # 権限チェック: MessagePolicy#create? をチェック (編集権限)
+    authorize @message
 
     if @message.save
       generate_ai_response(@message)
@@ -29,6 +35,9 @@ class MessagesController < ApplicationController
   end
 
   def update
+    # 権限チェック: MessagePolicy#update? をチェック
+    authorize @message
+
     @trip.messages.where('created_at > ?', @message.created_at).destroy_all
 
     if @message.update(message_params)
@@ -39,12 +48,15 @@ class MessagesController < ApplicationController
   end
 
   def destroy
+    # 権限チェック: MessagePolicy#destroy? をチェック (編集権限または作成者自身)
+    authorize @message
+    
     @message.destroy
     respond_to do |format|
       format.html do
         redirect_to trip_messages_path(@trip),
-                    notice: t('messages.user_message.delete_success'),
-                    status: :see_other
+                     notice: t('messages.user_message.delete_success'),
+                     status: :see_other
       end
       format.turbo_stream
     end
@@ -81,9 +93,7 @@ class MessagesController < ApplicationController
     result.is_a?(Array) ? result.first : result
   end
 
-  # MethodLength解消のため、システムインストラクションの定義を分離
   def build_request_content(message_record)
-    # 修正: ヘルパーからシステムインストラクションを取得
     system_instruction = helpers.build_system_instruction_for_ai
 
     # 会話履歴の構築ロジックを分離
@@ -93,12 +103,15 @@ class MessagesController < ApplicationController
 
   # 会話履歴の構築ロジックを分離
   def build_conversation_contents(message_record)
-    past_messages = @trip.messages.where.not(id: message_record.id).order(created_at: :asc)
+    past_messages = @trip.messages.order(created_at: :asc)
 
     contents = []
     past_messages.each do |msg|
-      contents << { role: 'user', parts: [{ text: msg.prompt }] }
-      contents << { role: 'model', parts: [{ text: msg.response }] } if msg.response.present?
+      # 自身より古いメッセージだけを履歴に含める
+      if msg.created_at < message_record.created_at
+        contents << { role: 'user', parts: [{ text: msg.prompt }] }
+        contents << { role: 'model', parts: [{ text: msg.response }] } if msg.response.present?
+      end
     end
 
     contents << { role: 'user', parts: [{ text: message_record.prompt }] }
@@ -123,13 +136,14 @@ class MessagesController < ApplicationController
   end
 
   def set_trip
-    @trip = Trip.shared_with_user(current_user).find(params[:trip_id])
+    @trip = Trip.find(params[:trip_id])
   rescue ActiveRecord::RecordNotFound
     redirect_to root_path, alert: t('messages.trip.not_found')
   end
 
   def set_message
-    @message = @trip.messages.where(user_id: current_user.id).find(params[:id])
+    # NOTE: 権限のないユーザーが他人のメッセージを編集/削除できないよう、Punditでチェック
+    @message = @trip.messages.find(params[:id]) 
   rescue ActiveRecord::RecordNotFound
     redirect_to trip_messages_path(@trip), alert: t('messages.user_message.not_found')
   end
@@ -137,10 +151,5 @@ class MessagesController < ApplicationController
   def message_params
     params.require(:message).permit(:prompt)
   end
-
-  def check_trip_edit_permission
-    unless @trip.editable_by?(current_user)
-      redirect_to trip_path(@trip), alert: "メッセージを作成/削除する権限がありません。"
-    end
-  end
+  
 end
