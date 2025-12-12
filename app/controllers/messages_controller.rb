@@ -50,7 +50,6 @@ class MessagesController < ApplicationController
     end
   end
 
-  # ... (destroy, generate_ai_response 以下のメソッドは変更なし、前回のまま) ...
   def destroy
     authorize @message
     
@@ -88,11 +87,14 @@ class MessagesController < ApplicationController
       if ai_response.present?
         message_record.update!(response: ai_response)
         
+        # @messages を再定義（Turbo Stream レンダリングに必要）
         @messages = @trip.messages.order(created_at: :asc)
         @hide_header = true
 
         respond_to do |format|
-          format.turbo_stream { render :index, status: :ok }
+          # ★修正箇所: 'messages/index' のテンプレートを使ってレンダリング
+          # Railsは自動的に messages/index.turbo_stream.erb を選択します。
+          format.turbo_stream { render 'messages/index', status: :ok }
           format.html { redirect_to trip_messages_path(@trip) }
         end
       else
@@ -104,7 +106,7 @@ class MessagesController < ApplicationController
   end
   
   def build_request_content(message_record)
-    system_instruction = helpers.build_system_instruction_for_ai
+    system_instruction, contents = helpers.build_system_instruction_for_ai
     contents = build_conversation_contents(message_record)
     [system_instruction, contents]
   end
@@ -133,8 +135,8 @@ class MessagesController < ApplicationController
     )
 
     result = client.generate_content({
-                                       contents: contents,
-                                       system_instruction: { parts: { text: system_instruction } }
+                                      contents: contents,
+                                      system_instruction: { parts: { text: system_instruction } }
                                      })
 
     result.is_a?(Array) ? result.first : result
