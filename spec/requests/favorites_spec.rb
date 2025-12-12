@@ -5,7 +5,14 @@ require 'rails_helper'
 RSpec.describe "Favorites", type: :request do
   let(:user) { create(:user) }
   let(:other_user) { create(:user) }
-  let!(:trip) { create(:trip, owner: other_user) } # 他のユーザーが所有する旅程
+  
+  # 他のユーザーが所有する旅程
+  let!(:trip) { create(:trip, owner: other_user) } 
+  
+  # ▼▼▼ 修正: userがtripを閲覧できるように、TripUserを追加 ▼▼▼
+  # 閲覧権限（viewer）で十分
+  let!(:trip_user) { create(:trip_user, trip: trip, user: user, permission_level: 'viewer') } 
+  # ▲▲▲ 修正終わり ▲▲▲
 
   # 共通処理: ログインしておく
   before { sign_in user }
@@ -22,6 +29,7 @@ RSpec.describe "Favorites", type: :request do
       end
 
       it "既に登録済みの場合、レコードは増えないこと" do
+        # 既に登録されているFavoriteは、このuserとtripの組み合わせである必要がある
         create(:favorite, user: user, trip: trip)
         
         expect {
@@ -52,6 +60,7 @@ RSpec.describe "Favorites", type: :request do
   # ============================================================================
   describe "DELETE /trips/:trip_id/favorite" do
     # 事前にお気に入りを作成しておく
+    # NOTE: let! で作成することで、テスト開始時にレコードが存在する
     let!(:favorite) { create(:favorite, user: user, trip: trip) }
 
     context "正常系" do
