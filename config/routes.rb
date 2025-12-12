@@ -37,7 +37,6 @@ Rails.application.routes.draw do
     end
   end
 
-  # ▼▼▼ 修正: 招待関連のルーティングを追加・整理 ▼▼▼
   # 招待受諾画面 (GET)
   get '/invitations/:token', to: 'invitations#accept', as: :invitation
 
@@ -46,7 +45,6 @@ Rails.application.routes.draw do
 
   # ゲスト参加 (POST)
   post '/invitations/:token/guest', to: 'invitations#accept_guest', as: :accept_guest_invitation
-  # ▲▲▲ 修正終わり ▲▲▲
 
   # 開発環境でのみメール確認画面を有効化
   mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
