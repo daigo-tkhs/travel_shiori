@@ -51,7 +51,9 @@
   </div>
 
   <div class="pt-4">
-    <%= f.submit btn_text, class: "w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-sm cursor-pointer" %>
+    <%= f.submit btn_text, 
+      class: "w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-sm cursor-pointer",
+      data: { 'geocoding-target': 'submit' } %>
     
     <%= link_to "キャンセル", trip_path(trip), class: "block w-full text-center text-gray-500 py-3 mt-2 hover:text-gray-700 transition text-sm" %>
   </div>
