@@ -2,11 +2,8 @@
 
 Rails.application.config.assets.version = '1.0'
 
-if defined?(Stimulus::Rails::Engine)
-  Rails.application.config.assets.paths << Stimulus::Rails::Engine.root.join('app', 'assets', 'javascripts')
-end
-
-Rails.application.config.assets.paths << Rails.root.join('app', 'assets', 'builds')
-
+# app/javascript フォルダをアセットの読み込み対象に追加
 Rails.application.config.assets.paths << Rails.root.join("app/javascript")
-Rails.application.config.assets.precompile += %w( controllers/*.js )
+
+# Tailwind CSS のビルドパス
+Rails.application.config.assets.paths << Rails.root.join('app', 'assets', 'builds')

@@ -57,4 +57,7 @@ Rails.application.configure do
     authentication: :plain,
     enable_starttls_auto: true
   }
+
+  config.assets.precompile += %w( controllers/map_controller.js controllers/sortable_controller.js controllers/geocoding_controller.js )
+  
 end
