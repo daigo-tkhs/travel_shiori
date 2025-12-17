@@ -6,12 +6,23 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <%# ▼▼▼ 本番環境用に正しいRailsヘルパーを使用します ▼▼▼ %>
-    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%# ▼▼▼ 修正: application.css を削除し、tailwindを再配置しました ▼▼▼ %>
     
+    <%# javascript_importmap_tagsの直後にコントローラーを直接読み込む処理を追加 %>
+    <%= javascript_importmap_tags %>
+
+    <%# production環境でのみ実行し、asset_pathを使用して正しいファイル名（ダイジェスト付き）を読み込みます %>
+    <% if Rails.env.production? %>
+      <script type="module" src="<%= asset_path 'controllers/map_controller.js' %>"></script>
+      <script type="module" src="<%= asset_path 'controllers/sortable_controller.js' %>"></script>
+      <script type="module" src="<%= asset_path 'controllers/geocoding_controller.js' %>"></script>
+    <% end %>
+    
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+
     <%# application.css は存在しないため削除しました %>
     
-    <%= javascript_importmap_tags %>
+    
   </head>
 
   <body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
