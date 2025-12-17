@@ -1,14 +1,12 @@
 # config/initializers/assets.rb
 
+# アセットのバージョン設定（キャッシュ更新用）
 Rails.application.config.assets.version = '1.0'
 
-# ▼▼▼ 修正版: Gemのアセットパスを読み込む（最も確実） ▼▼▼
+# Stimulusなどのアセットパスを追加（必要な場合のみ）
 if defined?(Stimulus::Rails::Engine)
   Rails.application.config.assets.paths << Stimulus::Rails::Engine.root.join('app', 'assets', 'javascripts')
 end
 
-# Tailwind CSS のアセットビルドパスも念のため再確認（ある場合）
+# Tailwind CSS のビルドパスを追加
 Rails.application.config.assets.paths << Rails.root.join('app', 'assets', 'builds')
-
-Rails.application.config.assets.paths << Rails.root.join("app/javascript")
-Rails.application.config.assets.precompile += %w( controllers/*.js )
