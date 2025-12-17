@@ -180,7 +180,8 @@ class SpotsController < ApplicationController
           end
 
           if travel_time_in_minutes.present?
-            previous_spot.update!(travel_time: travel_time_in_minutes)
+            # ★変更点: バリデーションをスキップして更新
+            previous_spot.update_columns(travel_time: travel_time_in_minutes, updated_at: Time.current)
           end
           
         rescue => e
@@ -195,7 +196,8 @@ class SpotsController < ApplicationController
       
       return unless spots_on_day.present?
 
-      spots_on_day.first.update!(travel_time: nil)
+      # ★変更点: バリデーションをスキップして更新
+      spots_on_day.first.update_columns(travel_time: nil, updated_at: Time.current)
       
       spots_on_day.each_with_index do |current_spot, index|
         next if index == 0
@@ -231,21 +233,25 @@ class SpotsController < ApplicationController
               duration_in_seconds = data['routes'][0]['legs'][0]['duration']['value'].to_i
               travel_time_in_minutes = (duration_in_seconds / 60.0).round.to_i 
               
-              previous_spot.update!(travel_time: travel_time_in_minutes)
+              # ★変更点: バリデーションをスキップして更新
+              previous_spot.update_columns(travel_time: travel_time_in_minutes, updated_at: Time.current)
             end
             
           rescue => e
             Rails.logger.error "Google Maps API/Network Error during re-sort: #{e.message}"
-            previous_spot.update!(travel_time: nil)
+            # ★変更点: バリデーションをスキップして更新
+            previous_spot.update_columns(travel_time: nil, updated_at: Time.current)
           end
         else
-          previous_spot.update!(travel_time: nil)
+          # ★変更点: バリデーションをスキップして更新
+          previous_spot.update_columns(travel_time: nil, updated_at: Time.current)
         end
       end
       
       last_spot_on_day = spots_on_day.last
       if last_spot_on_day.travel_time.present?
-        last_spot_on_day.update!(travel_time: nil)
+        # ★変更点: バリデーションをスキップして更新
+        last_spot_on_day.update_columns(travel_time: nil, updated_at: Time.current)
       end
     end
 end
