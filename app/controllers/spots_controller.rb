@@ -31,14 +31,14 @@ class SpotsController < ApplicationController
 
     # リダイレクト先を設定
     redirect_destination = is_from_chat ? trip_messages_path(@trip) : @trip 
-                             
+                              
     if @spot.save
       calculate_and_update_travel_time(@spot)
       
       flash[:notice] = "「#{@spot.name}」を旅程のDay #{@spot.day_number}に追加しました。"
       
       if is_from_chat
-        # ★修正: チャットからの場合は Turbo Stream でレスポンス（create.turbo_stream.erb を使用）
+        # チャットからの場合は Turbo Stream でレスポンス
         respond_to do |format|
           format.turbo_stream
           format.html { redirect_to redirect_destination }
@@ -130,7 +130,12 @@ class SpotsController < ApplicationController
         :latitude,  
         :longitude,
         :reservation_required
-      )
+      ).tap do |whitelisted|
+        if whitelisted[:estimated_cost].present?
+          # 文字列から数字以外の文字（カンマ、記号など）をすべて取り除き、整数に変換
+          whitelisted[:estimated_cost] = whitelisted[:estimated_cost].gsub(/[^0-9]/, '').to_i
+        end
+      end
     end
     
     # スポット追加時用の移動時間計算
@@ -142,7 +147,10 @@ class SpotsController < ApplicationController
          previous_spot.latitude.present? && previous_spot.longitude.present?
         
         begin
-          api_key = Rails.application.credentials.google_maps[:api_key]
+          # 環境変数からキーを取得
+          api_key = ENV['GOOGLE_MAPS_API_KEY'] || ENV['Maps_API_KEY']
+          
+          return unless api_key.present?
           
           origin      = "#{previous_spot.latitude},#{previous_spot.longitude}"
           destination = "#{new_spot.latitude},#{new_spot.longitude}"
@@ -198,7 +206,8 @@ class SpotsController < ApplicationController
            current_spot.latitude.present? && current_spot.longitude.present?
           
           begin
-            api_key = Rails.application.credentials.google_maps[:api_key]
+            api_key = ENV['GOOGLE_MAPS_API_KEY'] || ENV['Maps_API_KEY']
+            return unless api_key.present?
             
             origin      = "#{previous_spot.latitude},#{previous_spot.longitude}"
             destination = "#{current_spot.latitude},#{current_spot.longitude}"
