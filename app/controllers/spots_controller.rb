@@ -1,3 +1,5 @@
+# app/controllers/spots_controller.rb
+
 # frozen_string_literal: true
 require 'uri'
 require 'net/http'
@@ -31,7 +33,7 @@ class SpotsController < ApplicationController
 
     # リダイレクト先を設定
     redirect_destination = is_from_chat ? trip_messages_path(@trip) : @trip 
-                              
+                             
     if @spot.save
       calculate_and_update_travel_time(@spot)
       
@@ -96,11 +98,29 @@ class SpotsController < ApplicationController
     # 移動時間再計算ロジック
     recalculate_all_travel_times_for_day(new_day_number)
     
+    # Dayをまたぐ移動の場合、古いDayも再計算
     if old_day_number != new_day_number
       recalculate_all_travel_times_for_day(old_day_number)
     end
-
-    head :ok
+    
+    # Turbo Stream でスケジュール全体を更新する
+    respond_to do |format|
+      format.html { redirect_to @trip }
+      format.turbo_stream do
+        # _schedule.html.erb に合わせるため、spots_by_day という名前でローカル変数を設定
+        @spots_by_day = @trip.spots.order(day_number: :asc, position: :asc).group_by(&:day_number)
+        
+        # trip_schedule_frame の中のコンテンツを _schedule で置き換える
+        render turbo_stream: turbo_stream.replace(
+          "trip_schedule_frame", 
+          partial: "trips/schedule", 
+          locals: { 
+            trip: @trip, 
+            spots_by_day: @spots_by_day 
+          }
+        )
+      end
+    end
   end
 
 
@@ -143,8 +163,8 @@ class SpotsController < ApplicationController
       previous_spot = @trip.spots.order(:position).where(day_number: new_spot.day_number).where('position < ?', new_spot.position).last
       
       if previous_spot.present? && 
-         new_spot.latitude.present? && new_spot.longitude.present? && 
-         previous_spot.latitude.present? && previous_spot.longitude.present?
+          new_spot.latitude.present? && new_spot.longitude.present? && 
+          previous_spot.latitude.present? && previous_spot.longitude.present?
         
         begin
           # 環境変数からキーを取得
@@ -169,6 +189,12 @@ class SpotsController < ApplicationController
 
           response = Net::HTTP.get_response(uri)
           data = JSON.parse(response.body)
+          
+          # ログ追加: APIステータスを確認
+          Rails.logger.info "--- API Response Status (Create): #{data['status']} ---"
+          if data['error_message'].present?
+            Rails.logger.error "--- API Error Message (Create): #{data['error_message']} ---"
+          end
 
           travel_time_in_minutes = nil
           
@@ -209,6 +235,10 @@ class SpotsController < ApplicationController
           
           begin
             api_key = ENV['GOOGLE_MAPS_API_KEY'] || ENV['Maps_API_KEY']
+            
+            # ログ追加: APIキーの読み込みチェック
+            Rails.logger.info "--- API Key Status: #{api_key.present? ? 'Loaded' : 'Missing'} ---"
+            
             return unless api_key.present?
             
             origin      = "#{previous_spot.latitude},#{previous_spot.longitude}"
@@ -228,6 +258,13 @@ class SpotsController < ApplicationController
 
             response = Net::HTTP.get_response(uri)
             data = JSON.parse(response.body)
+
+            # ▼▼▼ ログ追加: APIステータスを確認 ▼▼▼
+            Rails.logger.info "--- API Response Status: #{data['status']} ---"
+            if data['error_message'].present?
+              Rails.logger.error "--- API Error Message: #{data['error_message']} ---"
+            end
+            # ▲▲▲ ログ追加ここまで ▲▲▲
 
             if data['status'] == 'OK' && data['routes'].present?
               duration_in_seconds = data['routes'][0]['legs'][0]['duration']['value'].to_i

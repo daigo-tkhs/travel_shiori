@@ -76,9 +76,14 @@ class TripPolicy < ApplicationPolicy
     user.present?
   end
   
-  # ▼▼▼ 追加: AIチャットの利用権限 ▼▼▼
   # 編集権限を持つユーザー（オーナーおよび編集者）はAIチャットを利用可能
   def ai_chat?
+    editor?
+  end
+
+  # チェックリストのインポート権限
+  def import?
+    # 編集権限があればインポート可能
     editor?
   end
 
@@ -87,10 +92,5 @@ class TripPolicy < ApplicationPolicy
   # ゲストとしてアクセス可能かチェックするプライベートメソッド
   def check_guest_access?
     false
-  end
-
-  # ChecklistsController#import の権限チェック用
-  def import?
-    editor?
   end
 end

@@ -87,14 +87,15 @@
           </div>
         </div>
         
-        <%# 旅行テーマ (仮のセレクトボックス) %>
+        <%# 旅行テーマ (Trip::THEMES を使用) %>
         <div>
           <%= f.label :travel_theme, "旅行テーマ", class: "block text-sm font-medium text-gray-700" %>
           <%= f.select :travel_theme, 
-            options_for_select(['観光', 'グルメ', '温泉・癒やし', 'アクティビティ', '未定'], f.object.travel_theme), 
-            { include_blank: '選択してください' }, 
-            class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+              Trip::THEMES, 
+              { include_blank: '選択してください' }, 
+              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
         </div>
+        <%# ▲▲▲ 修正ここまで ▲▲▲ %>
 
         <%# ボタン配置: 更新 → キャンセル (縦順) %>
         <div class="flex flex-col gap-3 pt-4 border-t border-gray-200">
@@ -113,7 +114,6 @@
     <%# --- 3. 旅程削除エリア --- %>
     <div class="mt-8 space-y-3">
       
-      <%# ★ 修正点: 注意書きの追加 ★ %>
       <div class="p-3 bg-red-100 border border-red-400 rounded-md flex items-start gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5">
           <path fill-rule="evenodd" d="M8.485 2.495c.673-1.076 2.357-1.076 3.03 0L14.935 5.95c.732 1.166-.2 2.76-1.516 2.76H6.58A1.75 1.75 0 0 1 5.065 5.95l3.42-3.455ZM11.012 15.5H9.006a.75.75 0 0 1 0-1.5h2.006a.75.75 0 0 1 0 1.5Z" clip-rule="evenodd" />
@@ -122,7 +122,6 @@
           旅程削除すると、旅程、スポット、共有履歴、および関連データが完全に消去されます。慎重に実行してください。
         </p>
       </div>
-      <%# ★ 注意書き 終了 ★ %>
       
       <%= button_to 'この旅程を削除', @trip, 
           method: :delete, 
@@ -132,5 +131,4 @@
     
   </div>
   
-
 </div>

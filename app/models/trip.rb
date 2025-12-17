@@ -1,6 +1,17 @@
 # frozen_string_literal: true
 
 class Trip < ApplicationRecord
+  # 旅行テーマの定数定義（新規・編集画面で共通利用するため）
+  THEMES = [
+    '温泉巡り',
+    '食体験重視',
+    '歴史・文化',
+    'アウトドア・アクティビティ',
+    'ショッピング',
+    'リゾート・保養',
+    'その他'
+  ].freeze
+
   # has_one_attached :image
 
   # 存在性の検証（必須項目）

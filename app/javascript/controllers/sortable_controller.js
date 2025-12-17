@@ -24,6 +24,8 @@ export default class extends Controller {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
+        // Turbo Stream のレスポンスを受け取るために 'text/vnd.turbo-stream.html' を指定
+        "Accept": "text/vnd.turbo-stream.html",
         "X-CSRF-Token": document.querySelector("[name='csrf-token']").content
       },
       body: JSON.stringify({ 
@@ -32,9 +34,9 @@ export default class extends Controller {
       })
     }) 
     .then(response => {
-      // サーバー応答後に強制リロード
+      // ▼▼▼ 修正: 強制リロード (window.location.reload()) を削除 ▼▼▼
       if (response.ok) {
-        window.location.reload()
+        // Turbo Stream がレスポンスを処理するため、ここでは何もしない
       } else {
         console.error('スポットの並び替えに失敗しました。');
       }
