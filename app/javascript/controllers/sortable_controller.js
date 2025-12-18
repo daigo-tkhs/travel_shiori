@@ -8,7 +8,7 @@ export default class extends Controller {
 
   connect() {
     this.sortable = Sortable.create(this.element, {
-      group: 'shared-spots',
+      group: 'shared-spots', // これにより異なる日の間での移動が可能になります
       animation: 150,
       handle: ".cursor-move",
       onEnd: this.end.bind(this)
@@ -33,7 +33,8 @@ export default class extends Controller {
       },
       body: JSON.stringify({ 
         spot: { 
-          day_number: newDayNumber
+          day_number: newDayNumber, // 移動先の日付
+          position: newIndex        // 移動先での順番（★ここを追加しました）
         }
       })
     }) 
@@ -44,7 +45,7 @@ export default class extends Controller {
         Turbo.renderStreamMessage(streamResponse)
       } else {
         console.error('スポットの並び替えに失敗しました。ステータス:', response.status);
-        // 失敗した場合はリロードして元の状態に戻す（ユーザーに失敗を知らせるため）
+        // 失敗した場合はリロードして元の状態に戻す
         window.location.reload()
       }
     })
