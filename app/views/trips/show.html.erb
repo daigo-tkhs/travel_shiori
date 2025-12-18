@@ -163,7 +163,7 @@
   <% end %>
 
   <%# --- Google Maps API スクリプト --- %>
-  <%# 修正ポイント: async defer を追加し、読み込みタイミングを安定させました %>
-  <script src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_MAPS_API_KEY'] || ENV['Maps_API_KEY'] %>&callback=mapControllerInit" async defer></script>
+  <%# 修正ポイント: callbackの後に &loading=async を追加しました %>
+  <script src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_MAPS_API_KEY'] || ENV['Maps_API_KEY'] %>&callback=mapControllerInit&loading=async" async defer></script>
 
 </div>

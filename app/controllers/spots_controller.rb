@@ -13,12 +13,11 @@ class SpotsController < ApplicationController
   end
 
   def new
-    @hide_header = true
+    @trip = Trip.find(params[:trip_id])
     @spot = @trip.spots.build
-    authorize @spot
-    
+
     respond_to do |format|
-      format.html # 必ずHTMLを返すように指定
+      format.html # これが抜けている、あるいはここを通っていない可能性があります
     end
   end
 
