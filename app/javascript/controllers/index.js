@@ -1,23 +1,19 @@
 // app/javascript/controllers/index.js
 
-// 1. application.js から application オブジェクトをインポート
 import { application } from "controllers/application"
 
-// 2. Stimulus Loadingを使った自動読み込み設定をコメントアウトし、手動で登録する
-// import { eagerLoadControllersFrom } from "@hotwired/stimulus-loading"
-// eagerLoadControllersFrom("controllers", application) 
+// 手動でインポートして登録する
+import HelloController from "controllers/hello_controller"
+application.register("hello", HelloController)
 
-// --- 3. 手動登録 ---
+import MapController from "controllers/map_controller"
+application.register("map", MapController)
 
-// geocoding_controller.js を登録
-import GeocodingController from "./geocoding_controller" 
+import SortableController from "controllers/sortable_controller"
+application.register("sortable", SortableController)
+
+import GeocodingController from "controllers/geocoding_controller"
 application.register("geocoding", GeocodingController)
 
-// map_controller を登録
-import MapController from "./map_controller" 
-application.register("map", MapController) 
-
-// sortable_controller を登録
-import SortableController from "./sortable_controller"
-application.register("sortable", SortableController)
-// ----------------------
+import ScrollController from "controllers/scroll_controller"
+application.register("scroll", ScrollController)
