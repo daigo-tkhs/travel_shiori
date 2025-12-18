@@ -88,12 +88,13 @@ class SpotsController < ApplicationController
 
     # 1. 保存処理
     # update ではなく update_columns を使うことで、
-    # 他の項目のバリデーション（予算の整数チェックなど）をスキップして日付だけを更新します
+    # 予算(estimated_cost)などのバリデーションをスキップして日付だけを更新します
     if @spot.day_number != new_day
       @spot.update_columns(day_number: new_day, updated_at: Time.current)
     end
     
-    # acts_as_list の insert_at はバリデーションをスキップするのでそのままでOK
+    # insert_at は acts_as_list の内部で position のみを更新するため
+    # 通常バリデーションをスキップしますが、念のため日付更新後に実行します
     @spot.insert_at(new_pos)
 
     # 2. 移動時間の再計算
