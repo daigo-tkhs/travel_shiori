@@ -79,25 +79,28 @@ class SpotsController < ApplicationController
     recalculate_all_travel_times_for_day(day_to_recalculate)
     redirect_to @trip, notice: t('messages.spot.delete_success'), status: :see_other
   end
-  
+
   def move
     authorize @spot
-    
-    new_pos = params[:spot][:position].to_i + 1
     new_day = params[:spot][:day_number].to_i
-    
+    new_pos = params[:spot][:position].to_i
     old_day = @spot.day_number
 
-    ActiveRecord::Base.transaction do
-      if @spot.day_number != new_day
-        @spot.update!(day_number: new_day)
-      end
-      @spot.insert_at(new_pos)
+    # 1. 保存処理
+    # update ではなく update_columns を使うことで、
+    # 他の項目のバリデーション（予算の整数チェックなど）をスキップして日付だけを更新します
+    if @spot.day_number != new_day
+      @spot.update_columns(day_number: new_day, updated_at: Time.current)
     end
+    
+    # acts_as_list の insert_at はバリデーションをスキップするのでそのままでOK
+    @spot.insert_at(new_pos)
 
+    # 2. 移動時間の再計算
     recalculate_all_travel_times_for_day(new_day)
     recalculate_all_travel_times_for_day(old_day) if old_day != new_day
 
+    # 3. レスポンス
     respond_to do |format|
       format.turbo_stream {
         @spots_by_day = @trip.spots.order(day_number: :asc, position: :asc).group_by(&:day_number)
