@@ -14,7 +14,7 @@
         <div class="flex items-center gap-2 text-[10px] text-gray-400">
           <%# nickname を使用 %>
           <span class="font-bold text-gray-500"><%= message.user&.nickname || "Unknown" %></span>
-          <span><%= message.created_at.strftime("%H:%M") %></span>
+          <span><%= message.created_at.in_time_zone('Tokyo').strftime("%H:%M") %></span>
         </div>
 
         <% if message.user_id == current_user.id %>

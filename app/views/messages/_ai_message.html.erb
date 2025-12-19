@@ -89,7 +89,7 @@
 
         <div class="flex items-center gap-2 mt-1 px-1">
           <span class="text-[10px] text-purple-600 font-bold">AI Concierge</span>
-          <span class="text-[10px] text-gray-400"><%= message.created_at.strftime("%H:%M") %></span>
+          <span class="text-[10px] text-gray-400"><%= message.created_at.in_time_zone('Tokyo').strftime("%H:%M") %></span>
         </div>
 
       </div>
