@@ -3,9 +3,9 @@ class TripPolicy < ApplicationPolicy
   class Scope < Scope
     def resolve
       scope.left_outer_joins(:trip_users)
-            .where(trips: { owner: user })
-            .or(scope.left_outer_joins(:trip_users).where(trip_users: { user: user }))
-            .distinct
+           .where(trips: { owner: user })
+           .or(scope.left_outer_joins(:trip_users).where(trip_users: { user: user }))
+           .distinct
     end
   end
   
@@ -62,13 +62,13 @@ class TripPolicy < ApplicationPolicy
   # 特殊な操作
   # ==================================
   
-  # 共有設定ページの表示と招待機能はオーナーのみに制限
+  # 【変更①】共有設定と招待は「編集者」も可能に変更（元はowner?のみ）
   def sharing?
-    owner?
+    editor?
   end
   
   def invite?
-    owner?
+    editor?
   end
   
   # クローン（複製）はログインユーザーなら誰でも許可
@@ -76,9 +76,10 @@ class TripPolicy < ApplicationPolicy
     user.present?
   end
   
-  # 編集権限を持つユーザー（オーナーおよび編集者）はAIチャットを利用可能
+  # 【変更④】AIチャットは「閲覧可能なログインユーザー」なら誰でも利用可能に変更（元はeditor?のみ）
+  # 閲覧者(Viewer)でもチャットに参加できるようになります
   def ai_chat?
-    editor?
+    user.present? && viewable?
   end
 
   # チェックリストのインポート権限

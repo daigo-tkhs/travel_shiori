@@ -4,7 +4,7 @@
 <%= turbo_frame_tag dom_id(message) do %>
   <% if message.response.present? %>
     <div class="flex justify-start items-start gap-2 mb-6">
-      <%= image_tag "ai_concierge_icon.png", class: "w-8 h-8 rounded-full object-cover flex-shrink-0", alt: "AI Icon" %>
+      <%= image_tag "ai_concierge_icon.png", class: "w-8 h-8 rounded-full object-cover flex-shrink-0 border border-purple-100", alt: "AI Icon" %>
       
       <div class="max-w-[90%]">
         <% suggestion = parse_spot_suggestion(message.response) %>
@@ -15,7 +15,6 @@
               <%= suggestion['message'] %>
             </div>
             <% if suggestion['spots'].present? %>
-              <%# ★修正: index (i) を取得して一意のフォームIDを作成 %>
               <% suggestion['spots'].each_with_index do |spot_data, i| %>
                 <div class="bg-white p-3 rounded-xl border border-blue-100 shadow-md overflow-hidden">
                   <div class="flex justify-between items-start gap-2 mb-2">
@@ -39,7 +38,6 @@
                     <% end %>
                   </div>
                   
-                  <%# ★修正: フォームに一意のID (unique_form_id) を設定 %>
                   <% unique_form_id = "add_spot_form_#{message.id}_#{i}" %>
                   <%= form_with url: trip_spots_path(message.trip), method: :post, id: unique_form_id, class: "mt-3 pt-2 border-t border-gray-100" do |f| %>
                     <%= f.hidden_field 'spot[name]', value: spot_data['name'] %>
@@ -49,7 +47,6 @@
                     <%= f.hidden_field 'spot[longitude]', value: spot_data['longitude'] %>
                     <%= f.hidden_field 'spot[source]', value: 'chat' %>
                     
-                    <%# ★追加: コントローラーにこのフォームIDを送信 %>
                     <%= hidden_field_tag :unique_form_id, unique_form_id %>
                     
                     <label class="flex items-center gap-2 mb-2 cursor-pointer">
@@ -76,6 +73,17 @@
             <%= simple_format(message.response) %>
           </div>
         <% end %>
+
+        <%# 【追加③】AI名と時刻の表示 %>
+        <div class="flex items-center gap-2 mt-1 px-1">
+          <span class="text-[10px] text-purple-600 font-bold">
+            AI Concierge
+          </span>
+          <span class="text-[10px] text-gray-400">
+            <%= message.created_at.strftime("%H:%M") %>
+          </span>
+        </div>
+
       </div>
     </div>
   <% end %>

@@ -2,25 +2,54 @@
 <%# ローカル変数: message %>
 
 <%= turbo_frame_tag dom_id(message) do %>
-  <div class="flex justify-end mb-2">
-    <div class="flex flex-col items-end max-w-[80%]">
-      <div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none shadow-md text-sm leading-relaxed">
+  <div class="flex justify-end items-end gap-2 mb-4 group">
+    
+    <%# メッセージ本文とメタ情報 %>
+    <div class="flex flex-col items-end max-w-[85%]">
+      
+      <%# 吹き出し %>
+      <div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none shadow-md text-sm leading-relaxed text-left">
         <%= simple_format(message.prompt, class: "mb-0") %>
       </div>
       
-      <%# 編集・削除リンク %>
-      <% if message.user_id == current_user.id %>
-        <div class="flex gap-3 mt-1 mr-1 text-[10px] text-gray-400">
-          <%# link_to のルーティングを message.trip を使って修正 %>
-          <%= link_to "編集", edit_trip_message_path(message.trip, message), 
-            class: "hover:text-blue-600 transition flex items-center gap-0.5",
-            data: { turbo_frame: dom_id(message) } %>
-          <%= button_to '削除', trip_message_path(message.trip, message), 
-            method: :delete, 
-            data: { turbo: false, turbo_confirm: '本当に削除しますか？' },
-            class: 'text-red-500 bg-transparent border-0 cursor-pointer' %>
+      <%# 下部情報エリア: 日時・名前・操作ボタン %>
+      <div class="flex items-center justify-end flex-wrap gap-x-3 gap-y-1 mt-1 mr-1">
+        
+        <%# 【追加③】日時と名前 %>
+        <div class="flex items-center gap-2 text-[10px]">
+          <span class="text-gray-400"><%= message.created_at.strftime("%H:%M") %></span>
+          <span class="text-gray-500 font-bold"><%= message.user&.name || "Unknown" %></span>
+        </div>
+
+        <%# 編集・削除リンク (本人のみ) %>
+        <% if message.user_id == current_user.id %>
+          <div class="flex items-center gap-2 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <span class="text-gray-300">|</span>
+            <%= link_to "編集", edit_trip_message_path(message.trip, message), 
+              class: "text-gray-400 hover:text-blue-600 transition",
+              data: { turbo_frame: dom_id(message) } %>
+            
+            <%= button_to '削除', trip_message_path(message.trip, message), 
+              method: :delete, 
+              data: { turbo: false, turbo_confirm: '本当に削除しますか？' },
+              class: 'text-red-400 hover:text-red-600 bg-transparent border-0 cursor-pointer p-0' %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <%# 【追加】ユーザーアイコン (名前のイニシャルを表示) %>
+    <div class="flex-shrink-0 mb-6">
+      <% if message.user&.avatar&.attached? %>
+        <%# アバター画像がある場合 %>
+        <%= image_tag message.user.avatar, class: "w-8 h-8 rounded-full object-cover border border-gray-100" %>
+      <% else %>
+        <%# アバターがない場合はイニシャルを表示 %>
+        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs font-bold border border-blue-200">
+          <%= message.user&.name&.first&.upcase || "U" %>
         </div>
       <% end %>
     </div>
+
   </div>
 <% end %>
