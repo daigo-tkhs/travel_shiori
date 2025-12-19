@@ -9,7 +9,6 @@ class SpotsController < ApplicationController
   before_action :ensure_editable!, only: %i[new create edit update destroy move]
   before_action :set_spot, only: %i[show edit update destroy move]
   
-  # ▼▼▼ 予算データの整形（.0削除など）を保存前に実行 ▼▼▼
   before_action :clean_spot_params, only: %i[create update]
 
   def show
@@ -18,7 +17,6 @@ class SpotsController < ApplicationController
 
   def new
     @spot = @trip.spots.build
-    # respond_to ブロック削除済み (new.html.erb を表示)
   end
 
   def edit
@@ -28,17 +26,14 @@ class SpotsController < ApplicationController
     is_from_chat = params[:spot][:source] == 'chat'
     @spot = @trip.spots.build(spot_params)
 
+    # チャットから来たならチャットへ、そうでなければ旅程詳細へ戻る
     redirect_destination = is_from_chat ? trip_messages_path(@trip) : @trip 
                              
     if @spot.save
       calculate_and_update_travel_time(@spot)
-      flash[:notice] = "「#{@spot.name}」を旅程のDay #{@spot.day_number}に追加しました。"
-      
-      respond_to do |format|
-        format.turbo_stream
-        format.html { redirect_to redirect_destination }
-      end
+      redirect_to redirect_destination, notice: "「#{@spot.name}」を旅程のDay #{@spot.day_number}に追加しました。"
     else
+      # エラー時は入力画面を再表示
       flash.now[:alert] = "入力内容を確認してください。"
       render :new, status: :unprocessable_entity
     end
@@ -116,11 +111,9 @@ class SpotsController < ApplicationController
     )
   end
 
-  # ▼▼▼ 金額の整形処理 ▼▼▼
   def clean_spot_params
     return unless params[:spot] && params[:spot][:estimated_cost].present?
     
-    # "¥20,000.0" -> 20000 に変換
     raw_cost = params[:spot][:estimated_cost].to_s.gsub(/[^\d.]/, '')
     params[:spot][:estimated_cost] = raw_cost.to_f.to_i
   end
