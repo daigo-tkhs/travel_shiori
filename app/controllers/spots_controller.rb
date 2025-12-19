@@ -8,7 +8,6 @@ class SpotsController < ApplicationController
   before_action :set_trip
   before_action :ensure_editable!, only: %i[new create edit update destroy move]
   before_action :set_spot, only: %i[show edit update destroy move]
-  
   before_action :clean_spot_params, only: %i[create update]
 
   def show
@@ -25,21 +24,17 @@ class SpotsController < ApplicationController
   def create
     is_from_chat = params[:spot][:source] == 'chat'
     @spot = @trip.spots.build(spot_params)
-
+                             
     if @spot.save
       calculate_and_update_travel_time(@spot)
       
       respond_to do |format|
         format.turbo_stream do
-          # チャットからの場合は、リダイレクトせずに演出用ストリームを返す
           render turbo_stream: [
             turbo_stream.append("messages", html: "<script>if(window.showSuccessAnimation){ window.showSuccessAnimation('#{@spot.name} を追加しました！'); }</script>".html_safe)
           ]
         end
-        format.html do
-          redirect_destination = is_from_chat ? trip_messages_path(@trip) : @trip
-          redirect_to redirect_destination, notice: "「#{@spot.name}」を旅程に追加しました。"
-        end
+        format.html { redirect_to (is_from_chat ? trip_messages_path(@trip) : @trip) }
       end
     else
       flash.now[:alert] = "入力内容を確認してください。"
@@ -51,11 +46,14 @@ class SpotsController < ApplicationController
     if @spot.update(spot_params)
       recalculate_all_travel_times_for_day(@spot.day_number) 
       respond_to do |format|
-        format.html { redirect_to @trip, notice: t('messages.spot.update_success') }
         format.turbo_stream do
           @spots_by_day = @trip.spots.order(day_number: :asc, position: :asc).group_by(&:day_number)
-          render turbo_stream: turbo_stream.replace("trip_schedule_frame", partial: "trips/schedule", locals: { trip: @trip, spots_by_day: @spots_by_day })
+          render turbo_stream: [
+            turbo_stream.replace("trip_schedule_frame", partial: "trips/schedule", locals: { trip: @trip, spots_by_day: @spots_by_day }),
+            turbo_stream.append("flash_container", html: "<script>if(window.showSuccessAnimation){ window.showSuccessAnimation('#{@spot.name} を更新しました！'); }</script>".html_safe)
+          ]
         end
+        format.html { redirect_to @trip }
       end
     else
       render :edit, status: :unprocessable_entity
@@ -64,9 +62,20 @@ class SpotsController < ApplicationController
 
   def destroy
     day_num = @spot.day_number
+    spot_name = @spot.name
     @spot.destroy!
     recalculate_all_travel_times_for_day(day_num)
-    redirect_to @trip, notice: t('messages.spot.delete_success'), status: :see_other
+
+    respond_to do |format|
+      format.turbo_stream do
+        @spots_by_day = @trip.spots.order(day_number: :asc, position: :asc).group_by(&:day_number)
+        render turbo_stream: [
+          turbo_stream.replace("trip_schedule_frame", partial: "trips/schedule", locals: { trip: @trip, spots_by_day: @spots_by_day }),
+          turbo_stream.append("flash_container", html: "<script>if(window.showSuccessAnimation){ window.showSuccessAnimation('#{spot_name} を削除しました'); }</script>".html_safe)
+        ]
+      end
+      format.html { redirect_to @trip, status: :see_other }
+    end
   end
   
   def move
@@ -121,26 +130,18 @@ class SpotsController < ApplicationController
 
   def clean_spot_params
     return unless params[:spot] && params[:spot][:estimated_cost].present?
-    
     raw_cost = params[:spot][:estimated_cost].to_s.gsub(/[^\d.]/, '')
     params[:spot][:estimated_cost] = raw_cost.to_f.to_i
-  end
-  
-  def calculate_and_update_travel_time(new_spot)
-    recalculate_all_travel_times_for_day(new_spot.day_number)
   end
   
   def recalculate_all_travel_times_for_day(day_number)
     spots_on_day = @trip.spots.where(day_number: day_number).order(:position)
     return unless spots_on_day.present?
     
-    # 全てのスポットの移動時間を一旦リセット（これによって最後尾のゴミデータが消える）
     spots_on_day.update_all(travel_time: nil)
     
     spots_on_day.each_with_index do |current_spot, index|
-      # 最後のスポットには「次の場所」がないので計算をスキップ
       next if index == spots_on_day.size - 1
-      
       next_spot = spots_on_day[index + 1]
       
       if current_spot.geocoded? && next_spot.geocoded?
@@ -159,7 +160,6 @@ class SpotsController < ApplicationController
           data = JSON.parse(Net::HTTP.get(uri))
           if data['status'] == 'OK'
             duration = (data['routes'][0]['legs'][0]['duration']['value'] / 60.0).round.to_i
-            # 「今のスポットから次への移動時間」として保存
             current_spot.update_columns(travel_time: duration, updated_at: Time.current)
           end
         rescue => e
@@ -168,6 +168,4 @@ class SpotsController < ApplicationController
       end
     end
   end
-
-  
 end

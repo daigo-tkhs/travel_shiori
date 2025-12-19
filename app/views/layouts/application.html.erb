@@ -28,7 +28,7 @@
       <%= render 'shared/header' unless @hide_header %>
 
       <div id="flash_container">
-        <%# 通常のフラッシュメッセージ（チャット以外からの遷移用） %>
+        <%# 通常のフラッシュメッセージ（JS演出が不要な遷移用として残す） %>
         <% if notice %>
           <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 m-4 rounded shadow-sm text-sm" role="alert">
             <p><%= notice %></p>
@@ -52,29 +52,35 @@
       <% end %>
     </div>
 
-    <%# --- AIチャット用：スポット追加成功時のアニメーション演出 --- %>
+    <%# --- 演出用スクリプト（追加・更新・削除 共通） --- %>
     <script>
       window.showSuccessAnimation = function(message) {
-        // すでに演出が表示されている場合は重複を避けるために消去
+        // 既存のバッジがあれば消去
         const existing = document.querySelector(".success-animation-badge");
         if (existing) existing.remove();
 
+        const isDelete = message.includes("削除");
         const el = document.createElement("div");
-        el.className = "success-animation-badge fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-4 rounded-full shadow-2xl font-bold transition-all duration-500 transform scale-0 opacity-0 pointer-events-none";
+        
+        // 削除時は赤、それ以外は紫〜青のグラデーション
+        const bgClass = isDelete 
+          ? "bg-gradient-to-r from-red-600 to-pink-600" 
+          : "bg-gradient-to-r from-purple-600 to-blue-600";
+
+        el.className = `success-animation-badge fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] ${bgClass} text-white px-8 py-4 rounded-full shadow-2xl font-bold transition-all duration-500 transform scale-0 opacity-0 pointer-events-none`;
         el.innerText = message;
         document.body.appendChild(el);
 
-        // 表示アニメーション（次のフレームで実行）
+        // 表示アニメーション
         requestAnimationFrame(() => {
           el.classList.remove("scale-0", "opacity-0");
           el.classList.add("scale-100", "opacity-100");
         });
 
-        // 2秒後に消去アニメーションを開始
+        // 2秒後に消去
         setTimeout(() => {
           el.classList.remove("scale-100", "opacity-100");
           el.classList.add("scale-90", "opacity-0");
-          // アニメーション完了後に要素を削除
           setTimeout(() => el.remove(), 500);
         }, 2000);
       };
