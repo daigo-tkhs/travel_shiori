@@ -2,10 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
   static targets = ["container", "spotImage"]
-  static values = {
-    apiKey: String,
-    markers: Array
-  }
+  static values = { apiKey: String, markers: Array }
 
   connect() {
     this.loadGoogleMaps()
@@ -16,10 +13,9 @@ export default class extends Controller {
       this.initMap()
       return
     }
-
     const script = document.createElement("script")
-    // libraries=places,marker を指定し、v=beta（最新機能用）を指定します
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${this.apiKeyValue}&libraries=places,marker&v=beta`
+    // v=weekly で安定版を読み込みます
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${this.apiKeyValue}&libraries=places&v=weekly`
     script.async = true
     script.defer = true
     script.onload = () => this.initMap()
@@ -29,46 +25,48 @@ export default class extends Controller {
   initMap() {
     if (!this.hasContainerTarget) return
 
-    // importLibrary を使わず、直接クラスを参照します
-    // これにより "is not a function" エラーを確実に回避します
+    // ズレを防ぐため、シンプルな設定にします
     const mapOptions = {
       center: { lat: 35.6812, lng: 139.7671 },
       zoom: 12,
-      mapId: "DEMO_MAP_ID", // 青いピン(AdvancedMarker)に必須
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: false
     }
 
+    // importLibraryを使わず、直接 new google.maps.Map します
     this.map = new google.maps.Map(this.containerTarget, mapOptions)
-    
     this.addMarkers()
     this.loadSpotPhotos()
   }
 
   addMarkers() {
     if (!this.markersValue || this.markersValue.length === 0) return
-
     const bounds = new google.maps.LatLngBounds()
 
     this.markersValue.forEach((markerData, index) => {
       const position = { lat: parseFloat(markerData.lat), lng: parseFloat(markerData.lng) }
       
-      // AdvancedMarkerElement を直接 new します
-      const pin = new google.maps.marker.PinElement({
-        glyphText: `${index + 1}`,
-        background: "#2563EB",
-        borderColor: "#1E40AF",
-        glyphColor: "white",
-      })
-
-      new google.maps.marker.AdvancedMarkerElement({
+      // 標準の Marker を使用（これが一番ズレません）
+      new google.maps.Marker({
         position: position,
         map: this.map,
         title: markerData.title,
-        content: pin.element
+        label: {
+          text: `${index + 1}`,
+          color: "white",
+          fontWeight: "bold"
+        },
+        // アイコンの設定（青いピンに見せる）
+        icon: {
+            path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+            scale: 6,
+            fillColor: "#2563EB",
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: "#1E40AF" 
+        }
       })
-
       bounds.extend(position)
     })
 
@@ -84,18 +82,18 @@ export default class extends Controller {
   loadSpotPhotos() {
     if (!this.hasSpotImageTarget) return
 
+    // Google Places サービスを初期化
     const service = new google.maps.places.PlacesService(this.map)
 
     this.spotImageTargets.forEach(target => {
       const spotName = target.dataset.spotName
       if (!spotName) return
 
-      const request = {
+      // スポット名で写真を検索
+      service.findPlaceFromQuery({
         query: spotName,
-        fields: ['photos'] 
-      }
-
-      service.findPlaceFromQuery(request, (results, status) => {
+        fields: ['photos']
+      }, (results, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK && results && results[0].photos) {
           const photoUrl = results[0].photos[0].getUrl({ maxWidth: 400 })
           this.injectPhoto(target, photoUrl)
