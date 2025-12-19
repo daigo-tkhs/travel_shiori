@@ -1,89 +1,96 @@
-// app/javascript/controllers/geocoding_controller.js
-
 import { Controller } from "@hotwired/stimulus"
 import debounce from "debounce"
 
 export default class extends Controller {
-  // ★修正箇所: "submit" ターゲットを追加
   static targets = [ "address", "latitude", "longitude", "submit" ] 
-  
   static values = { apiKey: String }
 
   connect() {
-    console.log("Geocoding Controller connected.")
     this.geocodeDebounced = debounce(this.geocode, 800)
     
-    // ★修正箇所: 初期状態ではボタンを無効化
+    // ▼▼▼ 修正: Mapコントローラーと同じ設定でAPIを読み込む ▼▼▼
+    this.loadGoogleMaps()
+    
+    // 初期状態はボタン無効（緯度経度がないため）
     this.toggleSubmitButton()
   }
 
-  // ジオコーディングを実行し、緯度経度を取得する
-  geocode() {
-    const address = this.addressTarget.value
-    
-    // 検索中はボタンを無効化
-    this.toggleSubmitButton(false) 
+  // ▼▼▼ 追加: API読み込み処理（これが無いと動きません） ▼▼▼
+  loadGoogleMaps() {
+    if (window.google && window.google.maps) return
 
-    if (address.length < 5) {
+    const existingScript = document.querySelector(`script[src*="maps.googleapis.com/maps/api/js"]`)
+    if (existingScript) return
+
+    const script = document.createElement("script")
+    // v=weekly と libraries=places,marker を指定して map_controller.js と統一
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${this.apiKeyValue}&libraries=places,marker&loading=async&v=weekly`
+    script.async = true
+    script.defer = true
+    document.head.appendChild(script)
+  }
+
+  // ▼▼▼ 修正: fetch ではなく google.maps.Geocoder を使用 ▼▼▼
+  async geocode() {
+    const address = this.addressTarget.value
+    this.toggleSubmitButton(false)
+
+    if (address.length < 2) {
       this.clearCoords()
-      this.toggleSubmitButton()
       return
     }
 
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${this.apiKeyValue}`
+    if (!window.google || !window.google.maps) {
+      console.warn("Google Maps API not loaded yet.")
+      return
+    }
 
-    fetch(url)
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === 'OK') {
-          const location = data.results[0].geometry.location
-          this.latitudeTarget.value = location.lat
-          this.longitudeTarget.value = location.lng
-        } else {
-          // ZERO_RESULTS やその他の API エラーの場合も座標をクリア
-          this.clearCoords() 
-        }
-        
-        // ★修正箇所: 結果に応じてボタンを有効化/無効化
-        this.toggleSubmitButton() 
-      })
-      .catch(error => {
-        console.error('Geocoding API Error:', error)
+    const geocoder = new google.maps.Geocoder()
+
+    try {
+      const result = await geocoder.geocode({ address: address })
+      
+      if (result.results && result.results.length > 0) {
+        const location = result.results[0].geometry.location
+        this.latitudeTarget.value = location.lat()
+        this.longitudeTarget.value = location.lng()
+      } else {
         this.clearCoords()
-        this.toggleSubmitButton(false) // 通信エラー時は無効のまま
-      })
+      }
+    } catch (error) {
+      console.error("Geocoding failed:", error)
+      this.clearCoords()
+    } finally {
+      this.toggleSubmitButton()
+    }
   }
   
-  // 緯度経度フィールドをクリアする
   clearCoords() {
     this.latitudeTarget.value = ''
     this.longitudeTarget.value = ''
     this.toggleSubmitButton()
   }
 
-  // ★新規追加: 送信ボタンの有効/無効を制御するメソッド
   toggleSubmitButton(forceState = null) {
-    // 緯度経度が両方存在するかどうか
+    if (!this.hasSubmitTarget) return
+
     const coordsPresent = this.latitudeTarget.value && this.longitudeTarget.value
-    let shouldBeEnabled;
+    let isEnabled
 
     if (forceState !== null) {
-      // 状態が強制されている場合 (例: 検索中、通信エラーなど)
-      shouldBeEnabled = forceState;
+      isEnabled = forceState
     } else {
-      // 緯度経度が揃っている場合のみ有効
-      shouldBeEnabled = coordsPresent;
+      isEnabled = coordsPresent
     }
 
-    if (this.submitTarget) {
-      this.submitTarget.disabled = !shouldBeEnabled;
-      
-      // 見た目の制御 (TailwindCSSを使用していると仮定)
-      if (shouldBeEnabled) {
-        this.submitTarget.classList.remove('opacity-50', 'cursor-not-allowed');
-      } else {
-        this.submitTarget.classList.add('opacity-50', 'cursor-not-allowed');
-      }
+    this.submitTarget.disabled = !isEnabled
+    
+    if (isEnabled) {
+      this.submitTarget.classList.remove('opacity-50', 'cursor-not-allowed')
+      this.submitTarget.classList.add('cursor-pointer')
+    } else {
+      this.submitTarget.classList.add('opacity-50', 'cursor-not-allowed')
+      this.submitTarget.classList.remove('cursor-pointer')
     }
   }
 }

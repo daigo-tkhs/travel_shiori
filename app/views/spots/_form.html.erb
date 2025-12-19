@@ -1,6 +1,4 @@
-<%# app/views/spots/_form.html.erb %>
-
-<%# APIキーの取得: credentials または 環境変数から安全に取得 %>
+<%# APIキーの取得 %>
 <% api_key_value = Rails.application.credentials.dig(:google_maps, :api_key) || ENV['GOOGLE_MAPS_API_KEY'] || ENV['Maps_API_KEY'] %>
 
 <%= form_with model: [trip, spot],
@@ -10,16 +8,29 @@
   }, 
   class: "space-y-5" do |f| %>
   
-  <%= render 'shared/error_messages', resource: spot %>
+  <%# エラーメッセージ表示エリア %>
+  <% if spot.errors.any? %>
+    <div class="bg-red-50 text-red-600 p-4 rounded-lg text-sm mb-4 border border-red-200">
+      <div class="font-bold mb-1">入力エラーがあります：</div>
+      <ul class="list-disc pl-5 space-y-1">
+        <% spot.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
 
   <div>
     <%= f.label :day_number, "何日目？", class: "block text-sm font-bold text-gray-700 mb-1" %>
-    <%= f.number_field :day_number, min: 1, class: "w-20 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-center" %>
+    <%# required: true を追加 %>
+    <%= f.number_field :day_number, min: 1, required: true, class: "w-20 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-center" %>
   </div>
 
   <div>
-    <%= f.label :name, "スポット名 (地名/施設名 必須)", class: "block text-sm font-bold text-gray-700 mb-1" %>
+    <%= f.label :name, "スポット名 (必須)", class: "block text-sm font-bold text-gray-700 mb-1" %>
+    <%# required: true を追加 %>
     <%= f.text_field :name, 
+        required: true,
         placeholder: "例: 軽井沢駅", 
         class: "w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500",
         data: { 'geocoding-target': 'address', action: 'keydown->geocoding#geocodeDebounced' } %>
@@ -51,7 +62,7 @@
 
   <div class="pt-4">
     <%= f.submit btn_text, 
-      class: "w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-sm cursor-pointer",
+      class: "w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
       data: { 'geocoding-target': 'submit' } %>
     
     <%= link_to "キャンセル", trip_path(trip), class: "block w-full text-center text-gray-500 py-3 mt-2 hover:text-gray-700 transition text-sm" %>

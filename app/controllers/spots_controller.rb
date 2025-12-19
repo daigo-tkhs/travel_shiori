@@ -9,7 +9,7 @@ class SpotsController < ApplicationController
   before_action :ensure_editable!, only: %i[new create edit update destroy move]
   before_action :set_spot, only: %i[show edit update destroy move]
   
-  # ▼▼▼ 追加: 予算データの整形（.0削除など）を保存前に実行 ▼▼▼
+  # ▼▼▼ 予算データの整形（.0削除など）を保存前に実行 ▼▼▼
   before_action :clean_spot_params, only: %i[create update]
 
   def show
@@ -18,7 +18,7 @@ class SpotsController < ApplicationController
 
   def new
     @spot = @trip.spots.build
-    # respond_to ブロックを削除し、デフォルト（HTML）でレンダリングさせる
+    # respond_to ブロック削除済み (new.html.erb を表示)
   end
 
   def edit
@@ -39,12 +39,9 @@ class SpotsController < ApplicationController
         format.html { redirect_to redirect_destination }
       end
     else
-      # エラー時は Turbo Stream でフラッシュを表示、かつステータスコード 422 を返す
-      flash.now[:alert] = "スポットの追加に失敗しました: #{@spot.errors.full_messages.join(', ')}"
-      respond_to do |format|
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("flash", partial: "shared/flash_messages"), status: :unprocessable_entity }
-        format.html { render :new, status: :unprocessable_entity }
-      end
+      # ▼▼▼ 修正: エラー時はシンプルに render :new を返す（これでフォームのエラーも表示されます） ▼▼▼
+      flash.now[:alert] = "入力内容を確認してください。"
+      render :new, status: :unprocessable_entity
     end
   end
 
@@ -116,7 +113,7 @@ class SpotsController < ApplicationController
     params.require(:spot).permit(
       :name, :description, :address, :category, :estimated_cost, 
       :duration, :travel_time, :day_number, :position, 
-      :latitude, :longitude, :reservation_required
+      :latitude, :longitude, :reservation_required, :booking_url
     )
   end
 

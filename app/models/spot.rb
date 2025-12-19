@@ -9,13 +9,12 @@ class Spot < ApplicationRecord
   # 保存・バリデーションの前に「予算」から数字以外の文字を掃除する
   before_validation :clean_estimated_cost
 
-  # 緯度・経度が変更された場合に移動時間を計算するコールバック
-  before_save :calculate_travel_time_from_previous, if: -> { (latitude_changed? || longitude_changed?) && geocoded? }
-
   enum :category, { sightseeing: 0, restaurant: 1, accommodation: 2, other: 3 }
 
-  # バリデーション
-  validates :name, presence: true, length: { maximum: 50 }
+  
+  # スポット名は必須
+  validates :name, presence: { message: "を入力してください" }, length: { maximum: 50 }  
+  validates :day_number, presence: { message: "を入力してください" }, numericality: { only_integer: true, greater_than: 0, message: "は1以上の数字で入力してください" }
   validates :estimated_cost, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
   validates :travel_time, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
@@ -30,18 +29,10 @@ class Spot < ApplicationRecord
   def clean_estimated_cost
     return if estimated_cost.blank?
     
+    # 全角数字なども考慮する場合、一度文字列にして整形
     self.estimated_cost = estimated_cost.to_s.gsub(/[^\d.]/, '').to_f.to_i
   end
 
-  def calculate_travel_time_from_previous
-    previous_spot = higher_item
-    return unless previous_spot&.geocoded? && geocoded?
-
-    begin
-      # TravelTimeService が定義されている前提
-      self.travel_time = TravelTimeService.new.calculate_time(previous_spot, self)
-    rescue => e
-      Rails.logger.error "TravelTime calculation failed: #{e.message}"
-    end
-  end
+  # 注意: TravelTimeService はまだ作成していないため、
+  # コールバックでの自動計算は削除し、コントローラー側の処理に任せます。
 end
