@@ -35,10 +35,9 @@ class TripsController < ApplicationController
   end
 
   def edit
-    authorize @trip
-    @hide_header = true
-    
-    # ★ 修正点: @message の初期化を削除。edit.html.erb にチャットフォームがない前提。
+    unless @trip.editable_by?(current_user)
+      redirect_to trip_path(@trip), alert: "編集権限がありません。"
+    end
   end
 
   def create

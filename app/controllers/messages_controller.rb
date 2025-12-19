@@ -1,16 +1,17 @@
 # frozen_string_literal: true
 
 class MessagesController < ApplicationController
-  
   before_action :authenticate_user!
   before_action :set_trip
+  # 修正：Punditの代わりにモデルのメソッドで権限チェック
+  before_action :ensure_viewable!, only: %i[index show]
   before_action :set_message, only: %i[edit update destroy]
+  # 編集・削除はメッセージの所有者本人のみ
+  before_action :ensure_message_owner!, only: %i[edit update destroy]
 
   def index
-    authorize @trip, :ai_chat?
-    
     @hide_header = true
-    @messages = @trip.messages.order(created_at: :asc)
+    @messages = @trip.messages.includes(:user).order(created_at: :asc)
     @message = Message.new
     
     respond_to do |format|
@@ -24,7 +25,6 @@ class MessagesController < ApplicationController
   end
 
   def edit
-    authorize @message
     render 'edit'
   end
 
@@ -32,10 +32,12 @@ class MessagesController < ApplicationController
     @message = @trip.messages.build(message_params)
     @message.user = current_user
     
-    authorize @message
+    # バリデーション前に簡易的な権限チェック（閲覧者なら投稿OKとする場合）
+    unless @trip.viewable_by?(current_user)
+      return redirect_to root_path, alert: "権限がありません。"
+    end
 
     if @message.save
-      # @ai_message をセットし、create.turbo_stream.erb でレンダリングする
       @ai_message = generate_ai_response(@message)
 
       respond_to do |format|
@@ -48,21 +50,17 @@ class MessagesController < ApplicationController
   end
 
   def update
-    authorize @message
-
-    # 変更前: obsolete_messages = @trip.messages.where('created_at > ?', @message.created_at)
+    # 過去の関連メッセージ（AI応答など）を削除するロジックは維持
     obsolete_messages = @trip.messages.where('id > ?', @message.id)
-    
     @deleted_message_ids = obsolete_messages.pluck(:id)
     obsolete_messages.destroy_all
 
     if @message.update(message_params)
-      # AI応答を再生成
       @ai_message = generate_ai_response(@message)
 
       respond_to do |format|
         format.html { redirect_to trip_messages_path(@trip), notice: t('messages.user_message.update_success') }
-        format.turbo_stream # update.turbo_stream.erb を探す
+        format.turbo_stream
       end
     else
       render :edit, status: :unprocessable_content
@@ -70,40 +68,31 @@ class MessagesController < ApplicationController
   end
 
   def destroy
-    authorize @message
-    
     obsolete_messages = @trip.messages.where('id > ?', @message.id)
-    @deleted_message_ids = obsolete_messages.pluck(:id) # 画面から消すためにIDを控える
+    @deleted_message_ids = obsolete_messages.pluck(:id)
     obsolete_messages.destroy_all
     
-    # 本体のメッセージを削除
     @message.destroy
 
     respond_to do |format|
       flash.now[:notice] = t('messages.user_message.delete_success') 
-      
       format.html { redirect_to trip_messages_path(@trip), status: :see_other } 
-      format.turbo_stream # destroy.turbo_stream.erb を使用
+      format.turbo_stream
     end
   end
 
-  # AI応答を生成し、メッセージレコードを返す
+  # --- AI生成ロジック ---
   def generate_ai_response(message_record)
     system_instruction, contents = build_request_content(message_record)
-
     raw_response = handle_ai_api_request(system_instruction, contents)
-
     handle_ai_response(raw_response)
   rescue StandardError => e
     Rails.logger.error "Gemini API Error: #{e.message}"
-    
-    # これにより、Message.new でない、有効なレコードが @ai_message にセットされる
     @trip.messages.create!(response: t('messages.ai.communication_error', error: e.message), user_id: nil)
   end
 
   private
 
-  # AI応答を処理し、DBに保存された AIメッセージレコードを返す
   def handle_ai_response(raw_response)
     ai_response = nil
     if raw_response && raw_response['candidates'].present?
@@ -111,15 +100,12 @@ class MessagesController < ApplicationController
     end
 
     if ai_response.present?
-      # ```json ... ``` の形式のブロックを空文字に置換
       cleaned_response = ai_response.gsub(/```json\s*\{.*?\}\s*```/m, '').strip
-      
       response_text = cleaned_response.present? ? cleaned_response : t('messages.ai.no_valid_response')
     else
       response_text = t('messages.ai.no_valid_response')
     end
 
-    # AI応答メッセージを作成し、返す
     @trip.messages.create!(response: response_text, user_id: nil) 
   end
   
@@ -134,10 +120,7 @@ class MessagesController < ApplicationController
     contents = []
     
     past_messages.each do |msg|
-      # user_id があればユーザーメッセージ、なければモデルメッセージと仮定
       role_type = msg.user_id.present? ? 'user' : 'model' 
-
-      # AIに渡す会話履歴は、直前のメッセージまで
       if msg.created_at < message_record.created_at
         text_content = msg.prompt.presence || msg.response.presence
         if text_content
@@ -145,10 +128,7 @@ class MessagesController < ApplicationController
         end
       end
     end
-    
-    # 現在のプロンプトを追加
     contents << { role: 'user', parts: [{ text: message_record.prompt }] }
-    
     contents
   end
   
@@ -166,9 +146,10 @@ class MessagesController < ApplicationController
                                        contents: contents,
                                        system_instruction: { parts: { text: system_instruction } }
                                      })
-
     result.is_a?(Array) ? result.first : result
   end
+
+  # --- ヘルパーメソッド ---
 
   def set_trip
     @trip = Trip.find(params[:trip_id])
@@ -182,8 +163,21 @@ class MessagesController < ApplicationController
     redirect_to trip_messages_path(@trip), alert: t('messages.user_message.not_found')
   end
 
+  # 権限チェック：閲覧可能か
+  def ensure_viewable!
+    unless @trip.viewable_by?(current_user)
+      redirect_to root_path, alert: "アクセス権限がありません。"
+    end
+  end
+
+  # 権限チェック：メッセージの編集・削除は本人のみ
+  def ensure_message_owner!
+    unless @message.user_id == current_user.id
+      redirect_to trip_messages_path(@trip), alert: "操作権限がありません。"
+    end
+  end
+
   def message_params
     params.require(:message).permit(:prompt)
   end
-  
 end
