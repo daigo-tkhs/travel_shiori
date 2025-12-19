@@ -3,14 +3,14 @@
 class MessagesController < ApplicationController
   before_action :authenticate_user!
   before_action :set_trip
-  # 修正：Punditの代わりにモデルのメソッドで権限チェック
   before_action :ensure_viewable!, only: %i[index show]
   before_action :set_message, only: %i[edit update destroy]
-  # 編集・削除はメッセージの所有者本人のみ
   before_action :ensure_message_owner!, only: %i[edit update destroy]
 
   def index
     @hide_header = true
+    @hide_footer = true # ★追加: フッターを非表示にする
+    
     @messages = @trip.messages.includes(:user).order(created_at: :asc)
     @message = Message.new
     
@@ -32,7 +32,6 @@ class MessagesController < ApplicationController
     @message = @trip.messages.build(message_params)
     @message.user = current_user
     
-    # バリデーション前に簡易的な権限チェック（閲覧者なら投稿OKとする場合）
     unless @trip.viewable_by?(current_user)
       return redirect_to root_path, alert: "権限がありません。"
     end
@@ -42,7 +41,7 @@ class MessagesController < ApplicationController
 
       respond_to do |format|
         format.html { redirect_to trip_messages_path(@trip), notice: t('messages.user_message.create_success') }
-        format.turbo_stream
+        format.turbo_stream # create.turbo_stream.erb をレンダリング
       end
     else
       redirect_to trip_messages_path(@trip), alert: t('messages.user_message.create_failure')
@@ -50,7 +49,6 @@ class MessagesController < ApplicationController
   end
 
   def update
-    # 過去の関連メッセージ（AI応答など）を削除するロジックは維持
     obsolete_messages = @trip.messages.where('id > ?', @message.id)
     @deleted_message_ids = obsolete_messages.pluck(:id)
     obsolete_messages.destroy_all
@@ -163,14 +161,12 @@ class MessagesController < ApplicationController
     redirect_to trip_messages_path(@trip), alert: t('messages.user_message.not_found')
   end
 
-  # 権限チェック：閲覧可能か
   def ensure_viewable!
     unless @trip.viewable_by?(current_user)
       redirect_to root_path, alert: "アクセス権限がありません。"
     end
   end
 
-  # 権限チェック：メッセージの編集・削除は本人のみ
   def ensure_message_owner!
     unless @message.user_id == current_user.id
       redirect_to trip_messages_path(@trip), alert: "操作権限がありません。"

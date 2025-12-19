@@ -6,9 +6,7 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <%# ▼▼▼ 修正: application.css を削除し、tailwindを再配置しました ▼▼▼ %>
-    
-    <%# javascript_importmap_tagsの直後にコントローラーを直接読み込む処理を追加 %>
+    <%# ▼▼▼ javascript_importmap_tagsの直後にコントローラーを直接読み込む処理 ▼▼▼ %>
     <%= javascript_importmap_tags %>
 
     <%# production環境でのみ実行し、asset_pathを使用して正しいファイル名（ダイジェスト付き）を読み込みます %>
@@ -19,10 +17,6 @@
     <% end %>
     
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
-
-    <%# application.css は存在しないため削除しました %>
-    
-    
   </head>
 
   <body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
@@ -30,7 +24,7 @@
     <%# --- メインコンテンツコンテナ --- %>
     <div class="flex-1 w-full max-w-md md:max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto bg-white shadow-xl relative min-h-screen pb-24">
       
-      <%# ヘッダー %>
+      <%# ヘッダー (@hide_header が真なら非表示) %>
       <%= render 'shared/header' unless @hide_header %>
 
       <div id="flash_container">
@@ -52,7 +46,7 @@
         <%= yield %>
       </main>
 
-      <%# フッター %>
+      <%# フッター (@hide_footer が真なら非表示) %>
       <% unless @hide_footer %>
         <%= render "shared/footer" %>
       <% end %>

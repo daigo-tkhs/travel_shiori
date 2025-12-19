@@ -1,6 +1,6 @@
 <%# app/views/messages/index.html.erb %>
-<%# 共通ヘッダーを非表示にし、チャット専用ヘッダーのみにする %>
 <% @hide_header = true %>
+<% @hide_footer = true %>
 
 <div class="bg-gray-50 min-h-screen flex flex-col overflow-hidden" style="height: 100dvh;">
 
@@ -29,9 +29,8 @@
   </div>
 
   <%# --- 2. メッセージ表示エリア --- %>
-  <%# 画面いっぱいに広げつつ、スクロールをこのエリア内に閉じ込めます %>
   <div class="flex-1 overflow-y-auto w-full relative">
-    <div class="max-w-3xl mx-auto px-4 py-8 space-y-8 pb-40">
+    <div class="max-w-3xl mx-auto px-4 py-8 space-y-6 pb-40">
       
       <%# 初回メッセージ %>
       <div class="flex justify-start items-start gap-3">
@@ -46,8 +45,22 @@
       </div>
 
       <%# 会話履歴 %>
-      <%= turbo_frame_tag "messages", class: "space-y-8" do %>
+      <%= turbo_frame_tag "messages", class: "space-y-6" do %>
+        <% last_date = nil %>
         <% @messages.each do |message| %>
+          <%# 日本時間で日付を取得 %>
+          <% current_date = message.created_at.in_time_zone('Tokyo').to_date %>
+          
+          <%# 日付が変わったら区切り線を表示 %>
+          <% if last_date != current_date %>
+            <div class="flex justify-center my-6">
+              <span class="bg-gray-200 text-gray-600 text-[10px] px-3 py-1 rounded-full font-bold shadow-sm">
+                <%= current_date.strftime("%Y/%m/%d (%a)") %>
+              </span>
+            </div>
+            <% last_date = current_date %>
+          <% end %>
+
           <% if message.user_id.present? %>
             <%= render "messages/user_message", message: message %>
           <% else %>
@@ -63,7 +76,10 @@
   <%# --- 3. 固定入力フォーム --- %>
   <div class="bg-white border-t border-gray-200 p-4 pb-safe-area shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
     <div class="max-w-3xl mx-auto">
-      <%= render "messages/form", trip: @trip, message: @message %>
+      <%# フォームの置換ターゲットとなるIDを追加 %>
+      <div id="new_message_area">
+        <%= render "messages/form", trip: @trip, message: @message %>
+      </div>
       <p class="text-[10px] text-gray-400 text-center mt-2">
         AIは間違った情報を生成することがあります。重要な情報はご自身で確認してください。
       </p>

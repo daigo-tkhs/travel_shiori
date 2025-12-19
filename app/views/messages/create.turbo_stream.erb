@@ -1,17 +1,25 @@
 <%# app/views/messages/create.turbo_stream.erb %>
 
-<%# 1. ユーザーメッセージをリストに追加 %>
-<%= turbo_stream.append "messages-container", partial: "messages/user_message", locals: { message: @message } %>
+<%# 1. ユーザーのメッセージを追加 %>
+<%= turbo_stream.append "messages" do %>
+  <%= render "messages/user_message", message: @message %>
+<% end %>
 
-<%# 2. AI応答メッセージをリストに追加 %>
+<%# 2. AIの返答を追加（もしあれば） %>
 <% if @ai_message.present? %>
-  <%= turbo_stream.append "messages-container", partial: "messages/ai_message", locals: { message: @ai_message } %>
+  <%= turbo_stream.append "messages" do %>
+    <%= render "messages/ai_message", message: @ai_message %>
+  <% end %>
 <% end %>
 
-<%# 3. フォームのリセット (テキストボックスクリア) %>
-<%= turbo_stream.replace "new_message_form" do %>
-  <%= render partial: "messages/form", locals: { trip: @message.trip, message: Message.new } %>
+<%# 3. 入力フォームをリセット (テキストボックスを空にする) %>
+<%= turbo_stream.replace "new_message_area" do %>
+  <%= render "messages/form", trip: @trip, message: Message.new %>
 <% end %>
 
-<%# 4. スクロールを最下部に移動 %>
-<%= turbo_stream.append "scroll-anchor", "<span data-scroll-to></span>" %>
+<%# 4. 一番下までスクロール %>
+<%= turbo_stream.append "messages" do %>
+  <script>
+    document.getElementById("scroll-anchor").scrollIntoView({ behavior: "smooth" });
+  </script>
+<% end %>

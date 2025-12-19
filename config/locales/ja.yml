@@ -1,5 +1,3 @@
-# config/locales/ja.yml (修正版)
-
 ja:
   messages:
     trip:
@@ -27,10 +25,8 @@ ja:
       item_not_found: "チェックリストアイテムが見つかりません。"
 
     user_message:
-      # ★今回追加・修正したキー★
       create_success: "メッセージを送信しました。"
       update_success: "メッセージを編集しました。"
-      # ★既存のキー★
       create_failure: "メッセージを入力してください。"
       delete_success: "メッセージを削除しました。"
       not_found: "権限がないか、メッセージが見つかりません。"
@@ -50,6 +46,8 @@ ja:
       login_required: "編集権限での参加にはログインが必要です。"
       guest_join_success: "ゲストとして旅程に参加しました！"
       approve_failure: "招待の承認に失敗しました。"
+      sent_success: "招待状を送信しました。" 
+      send_failure: "招待の送信に失敗しました。"
       
     member:
       not_found: "指定されたメールアドレスのユーザーは見つかりませんでした。"
