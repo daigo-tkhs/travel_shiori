@@ -16,7 +16,6 @@ class Spot < ApplicationRecord
 
   # バリデーション
   validates :name, presence: true, length: { maximum: 50 }
-  # clean_estimated_cost のおかげで、ここでは純粋に整数チェックだけでOKになります
   validates :estimated_cost, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
   validates :travel_time, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
@@ -27,13 +26,11 @@ class Spot < ApplicationRecord
 
   private
 
-  # 「¥1,000」や「1,000円」といった入力を「1000」に変換する
+  # 「¥1,000」や「2000.0」といった入力を「1000」「2000」に正しく変換する
   def clean_estimated_cost
     return if estimated_cost.blank?
-
-    # 文字列として扱い、数字以外（¥ , 円など）をすべて削除して整数にする
-    cleaned_value = estimated_cost.to_s.gsub(/[^0-9]/, '')
-    self.estimated_cost = cleaned_value.to_i if cleaned_value.present?
+    
+    self.estimated_cost = estimated_cost.to_s.gsub(/[^\d.]/, '').to_f.to_i
   end
 
   def calculate_travel_time_from_previous
