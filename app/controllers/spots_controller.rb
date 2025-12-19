@@ -6,20 +6,19 @@ require 'json'
 class SpotsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_trip
-  # 修正: 権限チェック用のメソッドを追加
   before_action :ensure_editable!, only: %i[new create edit update destroy move]
   before_action :set_spot, only: %i[show edit update destroy move]
+  
+  # ▼▼▼ 追加: 予算データの整形（.0削除など）を保存前に実行 ▼▼▼
+  before_action :clean_spot_params, only: %i[create update]
 
   def show
-    # 閲覧権限があるか確認
     redirect_to root_path, alert: "アクセス権限がありません。" unless @trip.viewable_by?(current_user)
   end
 
   def new
     @spot = @trip.spots.build
-    respond_to do |format|
-      format.html
-    end
+    # respond_to ブロックを削除し、デフォルト（HTML）でレンダリングさせる
   end
 
   def edit
@@ -40,10 +39,11 @@ class SpotsController < ApplicationController
         format.html { redirect_to redirect_destination }
       end
     else
-      flash[:alert] = "スポットの追加に失敗しました: #{@spot.errors.full_messages.join(', ')}"
+      # エラー時は Turbo Stream でフラッシュを表示、かつステータスコード 422 を返す
+      flash.now[:alert] = "スポットの追加に失敗しました: #{@spot.errors.full_messages.join(', ')}"
       respond_to do |format|
-        format.turbo_stream { render turbo_stream: turbo_stream.replace("flash", partial: "shared/flash_messages") }
-        format.html { redirect_to redirect_destination }
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("flash", partial: "shared/flash_messages"), status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_entity }
       end
     end
   end
@@ -59,7 +59,7 @@ class SpotsController < ApplicationController
         end
       end
     else
-      render :edit, status: :unprocessable_content
+      render :edit, status: :unprocessable_entity
     end
   end
 
@@ -75,17 +75,13 @@ class SpotsController < ApplicationController
     new_pos = params[:spot][:position].to_i
     old_day = @spot.day_number
 
-    # トランザクションで安全に実行
     Spot.transaction do
       if old_day != new_day
-        # 日付を更新
         @spot.update_columns(day_number: new_day, updated_at: Time.current)
       end
-      # acts_as_list の機能で新しい位置に挿入
       @spot.insert_at(new_pos)
     end
 
-    # 移動元と移動先、両方の日の移動時間を再計算
     recalculate_all_travel_times_for_day(new_day)
     recalculate_all_travel_times_for_day(old_day) if old_day != new_day
 
@@ -110,7 +106,6 @@ class SpotsController < ApplicationController
     @spot = @trip.spots.find(params[:id])
   end
 
-  # 修正ポイント: モデルの権限メソッドを使ってチェック
   def ensure_editable!
     unless @trip.editable_by?(current_user)
       redirect_to trip_path(@trip), alert: "この操作を行う権限がありません。"
@@ -124,9 +119,17 @@ class SpotsController < ApplicationController
       :latitude, :longitude, :reservation_required
     )
   end
+
+  # ▼▼▼ 金額の整形処理 ▼▼▼
+  def clean_spot_params
+    return unless params[:spot] && params[:spot][:estimated_cost].present?
+    
+    # "¥20,000.0" -> 20000 に変換
+    raw_cost = params[:spot][:estimated_cost].to_s.gsub(/[^\d.]/, '')
+    params[:spot][:estimated_cost] = raw_cost.to_f.to_i
+  end
   
   def calculate_and_update_travel_time(new_spot)
-    # 既存のロジック...
     recalculate_all_travel_times_for_day(new_spot.day_number)
   end
   
