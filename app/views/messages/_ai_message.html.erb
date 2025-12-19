@@ -38,30 +38,33 @@
                     <% end %>
                   </div>
                   
-                  <% unique_form_id = "add_spot_form_#{message.id}_#{i}" %>
-                  <%= form_with url: trip_spots_path(message.trip), method: :post, id: unique_form_id, class: "mt-3 pt-2 border-t border-gray-100" do |f| %>
-                    <%= f.hidden_field 'spot[name]', value: spot_data['name'] %>
-                    <%= f.hidden_field 'spot[estimated_cost]', value: spot_data['estimated_cost'] %>
-                    <%= f.hidden_field 'spot[duration]', value: spot_data['duration'] %>
-                    <%= f.hidden_field 'spot[latitude]', value: spot_data['latitude'] %>
-                    <%= f.hidden_field 'spot[longitude]', value: spot_data['longitude'] %>
-                    <%= f.hidden_field 'spot[source]', value: 'chat' %>
-                    
-                    <%= hidden_field_tag :unique_form_id, unique_form_id %>
-                    
-                    <label class="flex items-center gap-2 mb-2 cursor-pointer">
-                      <%= f.check_box 'spot[reservation_required]', class: "w-3.5 h-3.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %>
-                      <span class="text-xs text-gray-700 font-medium">このスポットは予約が必要</span>
-                    </label>
-                    <div class="flex gap-2">
-                      <%= f.select 'spot[day_number]', options_for_select(trip_days_options(message.trip)), {}, class: "flex-1 text-xs border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500 py-1.5" %>
-                      <%= f.button type: "submit", class: "bg-blue-600 text-white text-xs font-bold py-1.5 px-3 rounded-lg hover:bg-blue-700 transition flex items-center gap-1 flex-shrink-0" do %>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
-                          <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
-                        </svg>
-                        追加
-                      <% end %>
-                    </div>
+                  <%# 作成者のみにスポット追加ボタンを表示 %>
+                  <% if message.trip.user == current_user %>
+                    <% unique_form_id = "add_spot_form_#{message.id}_#{i}" %>
+                    <%= form_with url: trip_spots_path(message.trip), method: :post, id: unique_form_id, class: "mt-3 pt-2 border-t border-gray-100" do |f| %>
+                      <%= f.hidden_field 'spot[name]', value: spot_data['name'] %>
+                      <%= f.hidden_field 'spot[estimated_cost]', value: spot_data['estimated_cost'] %>
+                      <%= f.hidden_field 'spot[duration]', value: spot_data['duration'] %>
+                      <%= f.hidden_field 'spot[latitude]', value: spot_data['latitude'] %>
+                      <%= f.hidden_field 'spot[longitude]', value: spot_data['longitude'] %>
+                      <%= f.hidden_field 'spot[source]', value: 'chat' %>
+                      
+                      <%= hidden_field_tag :unique_form_id, unique_form_id %>
+                      
+                      <label class="flex items-center gap-2 mb-2 cursor-pointer">
+                        <%= f.check_box 'spot[reservation_required]', class: "w-3.5 h-3.5 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %>
+                        <span class="text-xs text-gray-700 font-medium">このスポットは予約が必要</span>
+                      </label>
+                      <div class="flex gap-2">
+                        <%= f.select 'spot[day_number]', options_for_select(trip_days_options(message.trip)), {}, class: "flex-1 text-xs border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500 py-1.5" %>
+                        <%= f.button type: "submit", class: "bg-blue-600 text-white text-xs font-bold py-1.5 px-3 rounded-lg hover:bg-blue-700 transition flex items-center gap-1 flex-shrink-0" do %>
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4">
+                            <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+                          </svg>
+                          追加
+                        <% end %>
+                      </div>
+                    <% end %>
                   <% end %>
                 </div>
               <% end %>
@@ -74,7 +77,6 @@
           </div>
         <% end %>
 
-        <%# 【追加③】AI名と時刻の表示 %>
         <div class="flex items-center gap-2 mt-1 px-1">
           <span class="text-[10px] text-purple-600 font-bold">
             AI Concierge
