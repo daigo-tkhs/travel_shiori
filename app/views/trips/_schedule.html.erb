@@ -4,13 +4,17 @@
 <div class="schedule-section space-y-6">
   <% if spots_by_day.present? %>
     <% spots_by_day.each do |day_num, spots| %>
+      
+      <%# nil対策: day_numがない場合は1日目として扱う %>
+      <% safe_day_num = (day_num || 1).to_i %>
+
       <div class="day-block">
         <div class="sticky top-[68px] z-20 -mx-4 px-4 py-2 bg-gray-100/95 backdrop-blur-sm border-y border-gray-200 flex justify-between items-center mb-4 lg:mx-0 lg:rounded-lg">
           <div class="flex items-center gap-2">
-            <span class="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded">DAY <%= day_num %></span>
+            <span class="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded">DAY <%= safe_day_num %></span>
             <span class="text-sm font-bold text-gray-700">
               <% if trip.start_date %>
-                <% target_date = trip.start_date + (day_num - 1).days %>
+                <% target_date = trip.start_date + (safe_day_num - 1).days %>
                 <%= target_date.strftime("%m月%d日") %> (<%= %w(日 月 火 水 木 金 土)[target_date.wday] %>)
               <% else %>
                 日付未定
@@ -22,7 +26,7 @@
         <div class="relative border-l-2 border-gray-200 ml-4 pl-6 space-y-6 pb-4 min-h-[100px]"
              data-controller="sortable"
              data-sortable-url-value="<%= move_trip_spot_path(trip, ':id') %>"
-             data-day-number="<%= day_num %>">
+             data-day-number="<%= safe_day_num %>">
           
           <% spots.each do |spot| %>
             <div class="relative group cursor-move" data-id="<%= spot.id %>">
@@ -31,7 +35,6 @@
               <div class="bg-white rounded-xl p-3 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex gap-3">
                   <div class="flex-shrink-0">
-                    <%# ▼▼▼ 修正箇所: 画像ターゲット属性を追加 ▼▼▼ %>
                     <div class="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden relative flex-shrink-0" 
                          data-map-target="spotImage" 
                          data-spot-name="<%= spot.name %>">
@@ -49,7 +52,18 @@
                       <h3 class="text-gray-900 font-bold text-sm leading-tight mb-1 truncate"><%= spot.name %></h3>
                       <p class="text-xs text-gray-500 flex items-center gap-1">
                         <span class="inline-block w-1.5 h-1.5 rounded-full bg-green-400"></span>
-                        <%= spot.category_i18n || '観光スポット' %>
+                        
+                        <%# ▼▼▼ 修正: category_i18n を使わず、ここで日本語に変換する ▼▼▼ %>
+                        <% 
+                           category_label = case spot.category
+                           when 'sightseeing' then '観光'
+                           when 'restaurant' then '食事'
+                           when 'accommodation' then '宿泊'
+                           when 'other' then 'その他'
+                           else '観光スポット'
+                           end
+                        %>
+                        <%= category_label %>
                       </p>
                     </div>
 
