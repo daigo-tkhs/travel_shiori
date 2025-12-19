@@ -74,9 +74,9 @@
   </div>
 
   <%# --- 3. 固定入力フォーム --- %>
-  <div class="bg-white border-t border-gray-200 p-4 pb-safe-area shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
+  <%# 修正箇所: p-4 -> p-3 に減らし、pb-safe-area を削除 %>
+  <div class="bg-white border-t border-gray-200 p-3 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
     <div class="max-w-3xl mx-auto">
-      <%# フォームの置換ターゲットとなるIDを追加 %>
       <div id="new_message_area">
         <%= render "messages/form", trip: @trip, message: @message %>
       </div>

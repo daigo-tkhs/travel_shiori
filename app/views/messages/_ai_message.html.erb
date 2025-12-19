@@ -17,11 +17,9 @@
             <% if suggestion['spots'].present? %>
               <% suggestion['spots'].each_with_index do |spot_data, i| %>
                 
-                <%# ▼▼▼ 修正: 金額を整数に整形する処理を追加 ▼▼▼ %>
                 <% 
-                   raw_cost = spot_data['estimated_cost'].to_s 
-                   # 数字以外（カンマなど）を取り除き、一度小数(float)にしてから整数(int)にする
-                   clean_cost = raw_cost.gsub(/[^\d.]/, '').to_f.to_i
+                   raw_cost_str = spot_data['estimated_cost'].to_s.gsub(/[^\d.]/, '')
+                   clean_cost = raw_cost_str.present? ? raw_cost_str.to_f.to_i : 0
                 %>
 
                 <div class="bg-white p-4 rounded-xl border border-blue-100 shadow-md overflow-hidden hover:shadow-lg transition-shadow">
@@ -43,7 +41,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
                           <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM6.75 9.25a.75.75 0 0 0 0 1.5h4.59l-2.1 1.95a.75.75 0 0 0 1.02 1.1l3.5-3.25a.75.75 0 0 0 0-1.1l-3.5-3.25a.75.75 0 1 0-1.02 1.1l2.1 1.95H6.75Z" clip-rule="evenodd" />
                         </svg>
-                        <%# 整形した clean_cost を使用 %>
+                        <%# 表示用も整数化済みの値を使う %>
                         ¥<%= number_with_delimiter(clean_cost) %>
                       </span>
                     </div>
@@ -61,8 +59,10 @@
                     <% unique_form_id = "add_spot_form_#{message.id}_#{i}" %>
                     <%= form_with url: trip_spots_path(message.trip), method: :post, id: unique_form_id, class: "mt-3 pt-3 border-t border-gray-100" do |f| %>
                       <%= f.hidden_field 'spot[name]', value: spot_data['name'] %>
-                      <%# 整形した clean_cost をフォームにセット %>
+                      
+                      <%# ▼▼▼ 重要: 整数化した clean_cost を送信する ▼▼▼ %>
                       <%= f.hidden_field 'spot[estimated_cost]', value: clean_cost %>
+                      
                       <%= f.hidden_field 'spot[duration]', value: spot_data['duration'] %>
                       <%= f.hidden_field 'spot[latitude]', value: spot_data['latitude'] %>
                       <%= f.hidden_field 'spot[longitude]', value: spot_data['longitude'] %>
