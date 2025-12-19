@@ -20,9 +20,9 @@
         </div>
 
         <div class="relative border-l-2 border-gray-200 ml-4 pl-6 space-y-6 pb-4 min-h-[100px]"
-            data-controller="sortable"
-            data-sortable-url-value="<%= move_trip_spot_path(trip, ':id') %>"
-            data-day-number="<%= day_num %>">
+             data-controller="sortable"
+             data-sortable-url-value="<%= move_trip_spot_path(trip, ':id') %>"
+             data-day-number="<%= day_num %>">
           
           <% spots.each do |spot| %>
             <div class="relative group cursor-move" data-id="<%= spot.id %>">
@@ -60,7 +60,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 text-gray-400">
                           <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
                         </svg>
-                        <span>¥<%= number_with_delimiter(spot.estimated_cost) %></span>
+                        <span>¥<%= number_with_delimiter(spot.estimated_cost.to_i) %></span>
                       </div>
                     </div>
 
@@ -101,7 +101,6 @@
     
     <% if trip.editable_by?(current_user) %>
       <div class="mt-6 text-center">
-        <%# ★ 406対策: data: { turbo_frame: "_top" } を追加 %>
         <%= link_to new_trip_spot_path(trip), 
                     data: { turbo_frame: "_top" },
                     class: "inline-flex items-center gap-2 bg-white border-2 border-blue-500 text-blue-600 px-6 py-2 rounded-full font-bold text-sm hover:bg-blue-50 transition-colors shadow-sm" do %>
