@@ -10,18 +10,16 @@ class ApplicationController < ActionController::Base
   include Pundit::Authorization
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
-  # ★★★ 修正箇所: after_sign_in_path_for を統一する ★★★
-  # Deviseのサインイン成功後のリダイレクト先を決定
+  # サインイン後のリダイレクト先を決定
   def after_sign_in_path_for(resource)
-    # 招待トークンがあれば処理を実行
-    invitation_path = handle_invitation_acceptance(resource)
-    return invitation_path if invitation_path.present?
+    # 1. InvitationsController#accept で保存された「元のURL」があればそこへ戻す
+    # (これにより、招待メール→ログイン→自動的に招待画面へ戻る動きが実現します)
+    stored_location = stored_location_for(resource)
+    return stored_location if stored_location
 
-    # 招待がない場合は、デフォルトの旅程一覧へ
+    # 2. 保存された場所がなければ、デフォルトの旅程一覧へ
     trips_path
   end
-  # ★★★ 修正箇所終了 ★★★
-
 
   protected
 
@@ -39,38 +37,6 @@ class ApplicationController < ActionController::Base
   end
 
   private
-
-  # 招待トークンを確認し、自動参加処理を実行
-  def handle_invitation_acceptance(user)
-    token = session[:invitation_token]
-
-    if token.present?
-      invitation = TripInvitation.find_by(token: token)
-
-      if invitation.present? && !invitation.accepted?
-        # 招待状を使用済みにマーク
-        invitation.update(accepted_at: Time.current)
-
-        # TripUserを作成（参加処理）
-        # find_or_create_by を利用して重複作成を防止
-        invitation.trip.trip_users.find_or_create_by(user: user) do |trip_user|
-          trip_user.permission_level = invitation.role # 権限を招待状から引き継ぐ
-        end
-
-        # 成功したらセッションをクリア
-        session.delete(:invitation_token)
-
-        # Flashメッセージを直接設定し、リダイレクトパスのみを返す
-        flash[:notice] = "#{invitation.trip.title} の招待を受け入れました！"
-        return trip_path(invitation.trip)
-      else
-        # 招待が無効な場合はセッションをクリア
-        session.delete(:invitation_token)
-      end
-    end
-
-    nil
-  end
 
   def basic_auth
     authenticate_or_request_with_http_basic do |username, password|
