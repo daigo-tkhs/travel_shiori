@@ -1,24 +1,107 @@
-# README
+# Travel Shiori (TripConcierge)
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## アプリケーション概要
+AIアシスタントと共に、直感的かつ効率的に旅行計画を作成・管理できるアプリケーションです。
+行きたい場所をチャットで相談すると、AIがスポットを提案。Google Mapsと連携し、地図上で位置関係を確認しながら、ドラッグ＆ドロップでスムーズに旅程を組み立てることができます。
 
-Things you may want to cover:
+## URL
+https://travel-shiori.onrender.com
 
-* Ruby version
+## テスト用アカウント
+* Basic認証ID: admin
+* Basic認証Pass: 2222
+* メールアドレス: test@test.com
+* パスワード: password123
 
-* System dependencies
+## 利用方法
+1. **ユーザー登録・ログイン**: 新規登録またはログインを行います。
+2. **旅程作成**: 「新しい旅程を作る」から、旅行のタイトルや日程、予算を入力して作成します。
+3. **スポット追加**:
+    * **手動追加**: 「スポットを追加」ボタンから、行きたい場所を入力します。
+    * **AI相談**: 画面右下の「AIとチャット」から、「軽井沢のおすすめカフェは？」のように質問し、提案されたスポットの「追加」ボタンを押します。
+4. **スケジュール調整**: 追加されたスポットはリストに並びます。ドラッグ＆ドロップで順番を入れ替えたり、日付を移動したりできます。
+5. **地図確認**: 追加したスポットは自動的にGoogle Maps上にピン留めされ、旅程順に番号が振られます。
 
-* Configuration
+## アプリケーションを作成した背景
+私自身、旅行の計画を立てるのが好きですが、以下の課題を感じていました。
+* 行きたい場所を探す検索サイト、位置を確認する地図アプリ、スケジュールをまとめるメモ帳を行き来するのが面倒。
+* 友人と計画を共有する際、情報が分散してしまう。
+* 「この場所とこの場所は近いのか？」が直感的にわかりにくい。
 
-* Database creation
+これらの課題を解決し、「情報収集」「位置確認」「スケジュール作成」を1つのアプリで完結させ、旅行前のワクワク感を高めたいという思いから作成しました。
 
-* Database initialization
+## 実装した機能についての画像やGIF
 
-* How to run the test suite
+### 1. AIコンシェルジュとのチャット・スポット登録
+Gemini APIを活用し、自然な会話で観光スポットを提案してもらえます。提案されたスポットはワンクリックで旅程に組み込めます。
+[![Image from Gyazo](https://gyazo.com/xx_placeholder_xx)](https://gyazo.com/xx_placeholder_xx)
 
-* Services (job queues, cache servers, search engines, etc.)
+### 2. Google Maps連携と正確なピン表示
+登録したスポットは即座に地図上に反映されます。
+AIが提案したスポット情報でも、保存時にGoogle Maps APIを用いて正確な位置情報（緯度経度）に自動補正する機能を実装しており、地図上のズレを防いでいます。
+[![Image from Gyazo](https://gyazo.com/xx_placeholder_xx)](https://gyazo.com/xx_placeholder_xx)
 
-* Deployment instructions
+### 3. ドラッグ＆ドロップによる直感的な編集
+「Day1」から「Day2」への移動や、訪問順序の入れ替えをドラッグ＆ドロップで直感的に操作できます。
+[![Image from Gyazo](https://gyazo.com/xx_placeholder_xx)](https://gyazo.com/xx_placeholder_xx)
 
-* ...
+### 4. リアルタイム更新（Turbo Streams）
+スポットの追加、削除、編集、およびチャットのやり取りは、ページリロードなしで即座に画面に反映され、ストレスのない操作感を実現しています。
+
+## 実装予定の機能
+* **旅程の共有機能**: URLを知っている友人が閲覧・編集できる機能。
+* **持ち物チェックリスト**: 旅行に必要な持ち物を管理する機能。
+* **予算管理の詳細化**: カテゴリ（食費、交通費など）ごとのグラフ表示。
+
+## データベース設計
+[![Image from Gyazo](https://gyazo.com/xx_placeholder_xx)](https://gyazo.com/xx_placeholder_xx)
+
+## 画面遷移図
+[![Image from Gyazo](https://gyazo.com/xx_placeholder_xx)](https://gyazo.com/xx_placeholder_xx)
+
+## 開発環境
+### バックエンド
+* Ruby 3.2.0
+* Ruby on Rails 7.0.x
+
+### フロントエンド
+* Tailwind CSS
+* JavaScript (Turbo / Stimulus)
+
+### データベース
+* PostgreSQL
+
+### インフラ・デプロイ
+* Render
+
+### API
+* Google Maps Platform (Maps JavaScript API, Geocoding API, Directions API, Places API (New))
+* Google Gemini API (gemini-2.0-flash)
+
+## ローカルでの動作方法
+```bash
+$git clone [https://github.com/daigo-tkhs/travel_shiori.git$](https://github.com/daigo-tkhs/travel_shiori.git$) cd travel_shiori
+$ bundle install
+$ yarn install
+# データベースの作成とマイグレーション
+$ rails db:create && rails db:migrate
+# 環境変数の設定が必要です（.envファイル等にGoogle Maps/GeminiのAPIキーを設定）
+# サーバー起動
+$ rails s
+```
+
+## 工夫したポイント
+### 1. AIと地図情報の整合性担保
+AI（LLM）は創造的な提案が得意な反面、正確な緯度経度を返すのが苦手という課題がありました。
+そこで、**「提案はAI、座標特定はGoogle Maps」**と役割を明確化。AIから提案されたスポットを保存する瞬間に、Rails側で改めてGoogle Geocoding APIを叩き直し、正確な位置情報をデータベースに保存する仕組みを構築しました。これにより、ユーザーは地図上の正確な位置を頼りに計画を立てられます。
+
+### 2. ストレスフリーなUI/UX
+チャット画面では、メッセージが増えてもヘッダーが固定され、入力フォームが常に手元にあるチャットアプリらしい挙動をCSS（Sticky/Fixed）で再現しました。
+また、Hotwire (Turbo) を積極的に採用し、スポット追加や編集時の画面遷移を無くすことで、ネイティブアプリのようなサクサクとした操作感を目指しました。
+
+## 改善点
+* モバイル表示時のUI調整（現在はPC/タブレット利用を主想定）。
+* ユーザーごとのアイコン設定機能。
+
+## 制作時間
+約 30 時間
