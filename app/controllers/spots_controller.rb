@@ -26,7 +26,8 @@ class SpotsController < ApplicationController
     @spot = @trip.spots.build(spot_params)
                              
     if @spot.save
-      calculate_and_update_travel_time(@spot)
+      # ★不具合修正：メソッド名を正しい名前に修正
+      recalculate_all_travel_times_for_day(@spot.day_number)
       
       respond_to do |format|
         format.turbo_stream do
@@ -45,7 +46,11 @@ class SpotsController < ApplicationController
   def update
     if @spot.update(spot_params)
       recalculate_all_travel_times_for_day(@spot.day_number) 
+      
       respond_to do |format|
+        # ★不具合修正：編集画面（HTML形式）からの送信時は、必ず旅程詳細へリダイレクトさせる
+        format.html { redirect_to @trip, notice: "#{@spot.name} を更新しました。" }
+        
         format.turbo_stream do
           @spots_by_day = @trip.spots.order(day_number: :asc, position: :asc).group_by(&:day_number)
           render turbo_stream: [
@@ -53,7 +58,6 @@ class SpotsController < ApplicationController
             turbo_stream.append("flash_container", html: "<script>if(window.showSuccessAnimation){ window.showSuccessAnimation('#{@spot.name} を更新しました！'); }</script>".html_safe)
           ]
         end
-        format.html { redirect_to @trip }
       end
     else
       render :edit, status: :unprocessable_entity
