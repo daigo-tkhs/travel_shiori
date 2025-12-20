@@ -1,4 +1,4 @@
-# Travel Shiori (TripConcierge)
+# TripConcierge
 
 ## アプリケーション概要
 AIアシスタントと共に、直感的かつ効率的に旅行計画を作成・管理できるアプリケーションです。
