@@ -44,7 +44,7 @@ AIが提案したスポット情報でも、保存時にGoogle Maps APIを用い
 
 ### 3. ドラッグ＆ドロップによる直感的な編集
 「Day1」から「Day2」への移動や、訪問順序の入れ替えをドラッグ＆ドロップで直感的に操作できます。
-<video src="https://gyazo.com/054fd109cc6b03ce172680ebe36240e5.mp4" autoplay loop muted playsinline width="100%"></video>
+![ドラッグ＆ドロップ編集](https://i.gyazo.com/054fd109cc6b03ce172680ebe36240e5.gif)
 
 ### 4. リアルタイム更新（Turbo Streams）
 スポットの追加、削除、編集、およびチャットのやり取りは、ページリロードなしで即座に画面に反映され、ストレスのない操作感を実現しています。
