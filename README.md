@@ -21,6 +21,7 @@ https://travel-shiori.onrender.com
     * **AI相談**: 画面右下の「AIとチャット」から、「軽井沢のおすすめカフェは？」のように質問し、提案されたスポットの「追加」ボタンを押します。
 4. **スケジュール調整**: 追加されたスポットはリストに並びます。ドラッグ＆ドロップで順番を入れ替えたり、日付を移動したりできます。
 5. **地図確認**: 追加したスポットは自動的にGoogle Maps上にピン留めされ、旅程順に番号が振られます。
+6. **共有・準備**: 作成した旅程を友人と共有したり、持ち物リストで準備状況を管理したりできます。
 
 ## アプリケーションを作成した背景
 私自身、旅行の計画を立てるのが好きですが、以下の課題を感じていました。
@@ -34,30 +35,33 @@ https://travel-shiori.onrender.com
 
 ### 1. AIコンシェルジュとのチャット・スポット登録
 Gemini APIを活用し、自然な会話で観光スポットを提案してもらえます。提案されたスポットはワンクリックで旅程に組み込めます。
-[![Image from Gyazo](https://gyazo.com/xx_placeholder_xx)](https://gyazo.com/xx_placeholder_xx)
+![AIチャット画面](https://gyazo.com/952feb5f418dbb796738d7f381499702)
 
 ### 2. Google Maps連携と正確なピン表示
 登録したスポットは即座に地図上に反映されます。
 AIが提案したスポット情報でも、保存時にGoogle Maps APIを用いて正確な位置情報（緯度経度）に自動補正する機能を実装しており、地図上のズレを防いでいます。
-[![Image from Gyazo](https://gyazo.com/xx_placeholder_xx)](https://gyazo.com/xx_placeholder_xx)
+![地図連携画面](https://gyazo.com/15c3303ed39a08c95d4cbd52b4b7edca)
 
 ### 3. ドラッグ＆ドロップによる直感的な編集
 「Day1」から「Day2」への移動や、訪問順序の入れ替えをドラッグ＆ドロップで直感的に操作できます。
-[![Image from Gyazo](https://gyazo.com/xx_placeholder_xx)](https://gyazo.com/xx_placeholder_xx)
+![ドラッグ＆ドロップ編集](https://gyazo.com/054fd109cc6b03ce172680ebe36240e5)
 
 ### 4. リアルタイム更新（Turbo Streams）
 スポットの追加、削除、編集、およびチャットのやり取りは、ページリロードなしで即座に画面に反映され、ストレスのない操作感を実現しています。
 
+### 5. その他の便利な機能
+* **旅程の共有機能**: URLを知っている友人が閲覧・編集でき、グループ旅行の計画がスムーズに行えます。
+* **持ち物チェックリスト**: 旅行に必要な持ち物をリスト化し、忘れ物を防ぐことができます。
+
 ## 実装予定の機能
-* **旅程の共有機能**: URLを知っている友人が閲覧・編集できる機能。
-* **持ち物チェックリスト**: 旅行に必要な持ち物を管理する機能。
+* **しおり（冊子）形式でのPDF出力**: 作成した旅程を、紙の「しおり」のように見やすくレイアウトして印刷・PDF化する機能（本アプリの「Travel Shiori」という名前に込めた本来の目的機能）。
 * **予算管理の詳細化**: カテゴリ（食費、交通費など）ごとのグラフ表示。
 
 ## データベース設計
-[![Image from Gyazo](https://gyazo.com/xx_placeholder_xx)](https://gyazo.com/xx_placeholder_xx)
+![ER図](ここにER図のGyazoURLを貼ってください)
 
 ## 画面遷移図
-[![Image from Gyazo](https://gyazo.com/xx_placeholder_xx)](https://gyazo.com/xx_placeholder_xx)
+![画面遷移図](ここに画面遷移図のGyazoURLを貼ってください)
 
 ## 開発環境
 ### バックエンド
