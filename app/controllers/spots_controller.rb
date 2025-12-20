@@ -48,15 +48,13 @@ class SpotsController < ApplicationController
       recalculate_all_travel_times_for_day(@spot.day_number) 
       
       respond_to do |format|
-        # ★不具合修正：編集画面（HTML形式）からの送信時は、必ず旅程詳細へリダイレクトさせる
-        format.html { redirect_to @trip, notice: "#{@spot.name} を更新しました。" }
+        # 1. 通常のフォーム送信（HTML）への対応
+        format.html { redirect_to trip_path(@trip), notice: "#{@spot.name} を更新しました。" }
         
+        # 2. Turbo環境（JS）での強制リダイレクト対応
+        # これを書くことで、ブラウザのURLが強制的に旅程詳細ページへ移動します
         format.turbo_stream do
-          @spots_by_day = @trip.spots.order(day_number: :asc, position: :asc).group_by(&:day_number)
-          render turbo_stream: [
-            turbo_stream.replace("trip_schedule_frame", partial: "trips/schedule", locals: { trip: @trip, spots_by_day: @spots_by_day }),
-            turbo_stream.append("flash_container", html: "<script>if(window.showSuccessAnimation){ window.showSuccessAnimation('#{@spot.name} を更新しました！'); }</script>".html_safe)
-          ]
+          render turbo_stream: turbo_stream.action(:redirect, trip_path(@trip))
         end
       end
     else
