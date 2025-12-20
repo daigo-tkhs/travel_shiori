@@ -4,12 +4,7 @@
   <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6">
     <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">スポット情報の編集</h2>
     
-    <%# フォームのレンダリング（btn_textは"更新する"に設定） %>
+    <%# フォームを呼び出します。キャンセルボタンはフォーム側に集約するため、ここでは呼び出しません %>
     <%= render 'form', trip: @trip, spot: @spot, btn_text: "更新する" %>
-    
-    <%# キャンセルボタン：URLを強制的に戻すために turbo: false を追加 %>
-    <div class="mt-4 text-center">
-      <%= link_to "キャンセルして戻る", trip_path(@trip), data: { turbo: false }, class: "text-sm text-gray-500 hover:text-gray-700 underline" %>
-    </div>
   </div>
 </div>
