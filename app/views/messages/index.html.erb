@@ -30,8 +30,7 @@
 
   <%# --- 2. メッセージ表示エリア (ここだけスクロール) --- %>
   <div class="flex-1 overflow-y-auto w-full relative scroll-smooth">
-    <%# --- 修正箇所: max-w-3xl から max-w-5xl に変更して横幅を広げました --- %>
-    <div class="max-w-5xl mx-auto px-4 py-8 space-y-6 pb-40">
+    <div class="max-w-7xl mx-auto px-4 py-8 space-y-6 pb-40">
       
       <%# 初回メッセージ %>
       <div class="flex justify-start items-start gap-3">
@@ -76,8 +75,7 @@
 
   <%# --- 3. 固定入力フォーム (画面最下部) --- %>
   <div class="bg-white border-t border-gray-200 p-3 shadow-[0_-10px_20px_rgba(0,0,0,0.02)] z-40 w-full">
-    <%# --- 修正箇所: ここも max-w-3xl から max-w-5xl に変更して入力欄を広げました --- %>
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-7xl mx-auto">
       <div id="new_message_area">
         <%= render "messages/form", trip: @trip, message: @message %>
       </div>
