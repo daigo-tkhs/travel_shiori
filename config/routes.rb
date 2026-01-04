@@ -2,6 +2,8 @@
 
 Rails.application.routes.draw do
   devise_for :users
+  
+  resources :users, only: [:show]
 
   # ログイン済みユーザーは、旅程一覧 (trips#index) へ
   authenticated :user do
@@ -16,8 +18,6 @@ Rails.application.routes.draw do
 
   # 旅程に関するリソースを定義
   resources :trips do
-    # --- 旅程にネストする機能 ---
-
     resources :messages, only: %i[index show create edit update destroy]
 
     resources :spots, only: %i[new create edit update destroy] do
@@ -32,30 +32,19 @@ Rails.application.routes.draw do
       end
     end
 
-    # メンバー管理機能
     resources :trip_users, only: %i[create destroy]
-
-    # お気に入り機能
     resource :favorite, only: %i[create destroy]
 
-    # 旅程固有のアクション（共有設定、招待メール送信）
     member do
       get :sharing
       post :invite
     end
   end
 
-  # 招待受諾画面 (GET)
   get '/invitations/:token', to: 'invitations#accept', as: :invitation
-
-  # 参加確定 (POST) - 新規追加
   post '/invitations/:token/join', to: 'invitations#join', as: :join_invitation
-
-  # ゲスト参加 (POST)
   post '/invitations/:token/guest', to: 'invitations#accept_guest', as: :accept_guest_invitation
 
-  # 開発環境でのみメール確認画面を有効化
   mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
-
   get 'up' => 'rails/health#show', as: :rails_health_check
 end
