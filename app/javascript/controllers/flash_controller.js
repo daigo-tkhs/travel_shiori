@@ -3,6 +3,8 @@ import { Controller } from "@hotwired/stimulus"
 // Connects to data-controller="flash"
 export default class extends Controller {
   connect() {
+    console.log("Flash controller connected!") 
+
     // 5秒後に削除アニメーションを開始
     this.timeout = setTimeout(() => {
       this.dismiss()
@@ -10,6 +12,8 @@ export default class extends Controller {
   }
 
   dismiss() {
+    console.log("Dismiss clicked") 
+
     clearTimeout(this.timeout)
     // ふわっと消えるアニメーション
     this.element.classList.add("opacity-0", "translate-y-[-20px]")
