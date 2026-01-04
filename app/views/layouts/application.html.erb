@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>TripConcierge</title>
+    <title>travel_shiori</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <%# ▼▼▼ javascript_importmap_tagsの直後にコントローラーを直接読み込む処理 ▼▼▼ %>
     <%= javascript_importmap_tags %>
 
-    <%# production環境でのみ実行し、asset_pathを使用して正しいファイル名（ダイジェスト付き）を読み込みます %>
     <% if Rails.env.production? %>
       <script type="module" src="<%= asset_path 'controllers/map_controller.js' %>"></script>
       <script type="module" src="<%= asset_path 'controllers/sortable_controller.js' %>"></script>
@@ -19,72 +17,39 @@
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
   </head>
 
+  <%# body自体を画面いっぱいのコンテナにする %>
   <body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
     
-    <%# --- メインコンテンツコンテナ --- %>
-    <div class="flex-1 w-full max-w-md md:max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto bg-white shadow-xl relative min-h-screen pb-24">
-      
-      <%# ヘッダー (@hide_header が真なら非表示) %>
-      <%= render 'shared/header' unless @hide_header %>
+    <%# 1. ヘッダーを最上位に配置して w-full を活かす %>
+    <%= render 'shared/header' unless @hide_header %>
 
+    <%# --- メインコンテンツエリア --- %>
+    <div class="flex-1 w-full mx-auto relative flex flex-col">
+      
       <div id="flash_container">
-        <%# 通常のフラッシュメッセージ（JS演出が不要な遷移用として残す） %>
         <% if notice %>
-          <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 m-4 rounded shadow-sm text-sm" role="alert">
-            <p><%= notice %></p>
+          <div class="max-w-7xl mx-auto w-full px-4 mt-4">
+            <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded shadow-sm text-sm" role="alert">
+              <p><%= notice %></p>
+            </div>
           </div>
         <% end %>
-        <% if alert %>
-          <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 m-4 rounded shadow-sm text-sm" role="alert">
-            <p><%= alert %></p>
-          </div>
-        <% end %>
+        <%# (alertも同様に max-w-7xl mx-auto で囲むと綺麗です) %>
       </div>
 
       <%# メインコンテンツ %>
-      <main>
+      <%# 
+          ★重要: trips/new などで max-w-4xl mx-auto を指定しているので、
+          ここでは余計な幅制限をかけず yield させます。
+      %>
+      <main class="flex-1 w-full">
         <%= yield %>
       </main>
 
-      <%# フッター (@hide_footer が真なら非表示) %>
+      <%# フッター %>
       <% unless @hide_footer %>
         <%= render "shared/footer" %>
       <% end %>
     </div>
-
-    <%# --- 演出用スクリプト（追加・更新・削除 共通） --- %>
-    <script>
-      window.showSuccessAnimation = function(message) {
-        // 既存のバッジがあれば消去
-        const existing = document.querySelector(".success-animation-badge");
-        if (existing) existing.remove();
-
-        const isDelete = message.includes("削除");
-        const el = document.createElement("div");
-        
-        // 削除時は赤、それ以外は紫〜青のグラデーション
-        const bgClass = isDelete 
-          ? "bg-gradient-to-r from-red-600 to-pink-600" 
-          : "bg-gradient-to-r from-purple-600 to-blue-600";
-
-        el.className = `success-animation-badge fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[100] ${bgClass} text-white px-8 py-4 rounded-full shadow-2xl font-bold transition-all duration-500 transform scale-0 opacity-0 pointer-events-none`;
-        el.innerText = message;
-        document.body.appendChild(el);
-
-        // 表示アニメーション
-        requestAnimationFrame(() => {
-          el.classList.remove("scale-0", "opacity-0");
-          el.classList.add("scale-100", "opacity-100");
-        });
-
-        // 2秒後に消去
-        setTimeout(() => {
-          el.classList.remove("scale-100", "opacity-100");
-          el.classList.add("scale-90", "opacity-0");
-          setTimeout(() => el.remove(), 500);
-        }, 2000);
-      };
-    </script>
-
   </body>
 </html>

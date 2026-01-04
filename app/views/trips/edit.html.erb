@@ -1,20 +1,20 @@
-<%# app/views/trips/edit.html.erb %>
+<%# 旅程編集画面: 共通ヘッダーを隠し、専用のグラデーションヘッダーを使用 %>
 
-<div class="bg-gray-50 min-h-screen pb-24">
+<div class="bg-gray-50 min-h-screen pb-32">
   
-  <%# --- 1. 詳細画面専用ヘッダー --- %>
+  <%# --- 1. 詳細画面から移植した専用ヘッダー --- %>
   <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-4">
       <div class="flex items-start justify-between gap-3">
         <%# 戻るボタン %>
-        <%= link_to root_path, class: "p-2 hover:bg-white/20 rounded-full transition-colors flex-shrink-0" do %>
+        <%= link_to trip_path(@trip), class: "p-2 hover:bg-white/20 rounded-full transition-colors flex-shrink-0" do %>
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
           </svg>
         <% end %>
 
         <div class="flex-1 pt-1">
-          <%# タイトル: 編集中の旅程名を表示 %>
+          <%# タイトル %>
           <h1 class="text-lg font-bold leading-tight mb-1">編集: <%= @trip.title %></h1>
           <div class="flex items-center gap-2 text-blue-100 text-xs">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3">
@@ -31,11 +31,12 @@
           </div>
         </div>
 
+        <%# 右側アクションボタン (詳細画面と同じ構成) %>
         <div class="flex items-center gap-1 flex-shrink-0">
-          <%# 編集ボタンをキャンセルボタンとして利用 %>
-          <%= link_to @trip, class: "p-2 hover:bg-white/20 rounded-full transition-colors" do %>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          <%# 編集画面なので、編集ボタンの代わりに「閉じる(X)」ボタンを配置して詳細に戻れるようにします %>
+          <%= link_to trip_path(@trip), class: "p-2 hover:bg-white/20 rounded-full transition-colors", title: "編集を終了" do %>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           <% end %>
         </div>
@@ -43,92 +44,38 @@
     </div>
   </div>
 
-  <%# --- 2. メインコンテンツ: フォームエリア (カード形式) --- %>
-  <div class="max-w-xl mx-auto p-4">
+  <%# --- 2. メインコンテンツエリア: max-w-2xl で幅を統一 --- %>
+  <div class="max-w-2xl mx-auto px-6 mt-12">
     
-    <%# 旅程編集カード %>
-    <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-
-      <%# エラー表示エリア %>
-      <%= render 'shared/error_messages', resource: @trip %>
-
-      <%# フォーム開始 %>
-      <%= form_with(model: @trip, local: true, class: "space-y-6") do |f| %>
-
-        <%# 旅行タイトル %>
-        <div>
-          <%= f.label :title, "旅行名", class: "block text-sm font-medium text-gray-700" %>
-          <%= f.text_field :title, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500", placeholder: "例: 家族で沖縄ビーチ巡り" %>
-        </div>
-
-        <%# 旅行期間 %>
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <%= f.label :start_date, "開始日", class: "block text-sm font-medium text-gray-700" %>
-            <%= f.date_field :start_date, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
-          </div>
-          <div>
-            <%= f.label :end_date, "終了日", class: "block text-sm font-medium text-gray-700" %>
-            <%= f.date_field :end_date, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
-          </div>
-        </div>
+    <%# 更新用カード %>
+    <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+      <div class="px-8 py-10 md:px-12 md:py-12">
+        <%= render 'form', trip: @trip, btn_text: "旅程を更新する" %>
         
-        <%# 総予算 %>
-        <div>
-          <%= f.label :total_budget, "総予算 (オプション)", class: "block text-sm font-medium text-gray-700" %>
-          <div class="mt-1 relative rounded-md shadow-sm">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span class="text-gray-500 sm:text-sm">¥</span>
-            </div>
-            <%= f.number_field :total_budget, class: "block w-full pl-7 pr-12 rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500", placeholder: "例: 150000" %>
-            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-              <span class="text-gray-500 sm:text-sm">JPY</span>
-            </div>
-          </div>
+        <div class="mt-6">
+          <%= link_to 'キャンセルして戻る', trip_path(@trip), class: "w-full block text-center py-4 rounded-full text-gray-500 font-bold bg-gray-100 hover:bg-gray-200 transition-all text-sm" %>
         </div>
-        
-        <%# 旅行テーマ (Trip::THEMES を使用) %>
-        <div>
-          <%= f.label :travel_theme, "旅行テーマ", class: "block text-sm font-medium text-gray-700" %>
-          <%= f.select :travel_theme, 
-              Trip::THEMES, 
-              { include_blank: '選択してください' }, 
-              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
-        </div>
-        <%# ▲▲▲ 修正ここまで ▲▲▲ %>
+      </div>
+    </div>
 
-        <%# ボタン配置: 更新 → キャンセル (縦順) %>
-        <div class="flex flex-col gap-3 pt-4 border-t border-gray-200">
-          
-          <%# 1. 送信ボタン (上部に配置) %>
-          <%= f.submit '旅程を更新', class: "w-full px-4 py-2 bg-blue-600 text-white font-medium rounded-md shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer" %>
-          
-          <%# 2. キャンセルボタン (下部に配置) %>
-          <%= link_to 'キャンセル', @trip, class: "w-full text-center text-sm text-gray-700 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-md shadow-sm transition-colors cursor-pointer" %>
-          
-        </div>
-      <% end %>
-    
-    </div> <%# /旅程編集カード %>
-
-    <%# --- 3. 旅程削除エリア --- %>
-    <div class="mt-8 space-y-3">
-      
-      <div class="p-3 bg-red-100 border border-red-400 rounded-md flex items-start gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5">
-          <path fill-rule="evenodd" d="M8.485 2.495c.673-1.076 2.357-1.076 3.03 0L14.935 5.95c.732 1.166-.2 2.76-1.516 2.76H6.58A1.75 1.75 0 0 1 5.065 5.95l3.42-3.455ZM11.012 15.5H9.006a.75.75 0 0 1 0-1.5h2.006a.75.75 0 0 1 0 1.5Z" clip-rule="evenodd" />
+    <%# --- 3. 危険ゾーン（削除エリア）: マージン mt-16 を確保 --- %>
+    <div class="mt-16 p-8 bg-red-50 rounded-3xl border border-red-100 shadow-sm">
+      <div class="flex items-center gap-3 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 text-red-600">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
         </svg>
-        <p class="text-sm text-red-700 leading-relaxed">
-          旅程削除すると、旅程、スポット、共有履歴、および関連データが完全に消去されます。慎重に実行してください。
-        </p>
+        <h3 class="text-red-700 font-bold text-lg">旅程の削除</h3>
       </div>
       
-      <%= button_to 'この旅程を削除', @trip, 
+      <p class="text-sm text-red-600 mb-6 leading-relaxed">
+        この操作は取り消せません。この旅程に関連するすべてのスポットデータが完全に消去されます。
+      </p>
+      
+      <%= button_to 'この旅程を完全に削除する', @trip, 
           method: :delete, 
-          data: { turbo_confirm: "本当にこの旅程「#{@trip.title}」を完全に削除しますか？\nこの操作は元に戻せません。" },
-          class: "w-full text-center text-sm font-medium text-red-600 bg-white hover:bg-red-50 border border-red-300 px-4 py-2 rounded-md shadow-sm transition-colors cursor-pointer" %>
+          data: { turbo_confirm: "本当に削除しますか？" },
+          class: "w-full text-sm font-bold text-red-600 py-4 rounded-full border border-red-200 bg-white hover:bg-red-100 transition-all shadow-sm cursor-pointer" %>
     </div>
-    
+
   </div>
-  
 </div>

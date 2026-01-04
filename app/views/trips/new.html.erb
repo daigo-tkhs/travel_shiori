@@ -1,9 +1,35 @@
-<%# app/views/trips/new.html.erb %>
+<%# 旅程作成画面: ヘッダー・フッター表示 %>
 
-<div class="pb-24 px-4 pt-6">
-  <h1 class="text-2xl font-bold text-gray-900 mb-6">新しい旅程を作成</h1>
-  <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-    <%# 作成したパーシャルを呼び出し、ボタンの文言を渡す %>
-    <%= render 'form', trip: @trip, btn_text: "旅程を作成" %>
+<div class="min-h-screen w-full bg-gray-50 font-sans">
+  
+  <%# --- 統一されたコンテナ幅: max-w-2xl --- %>
+  <div class="max-w-2xl mx-auto px-6 pt-12 pb-32">
+    
+    <%# 画面タイトル %>
+    <div class="mb-10 text-center">
+      <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">新しい旅程を作成</h1>
+      <p class="mt-2 text-gray-500">AIと一緒に、最高のプランを組み立てましょう</p>
+    </div>
+
+    <%# --- カード（外枠） --- %>
+    <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+      
+      <%# --- 内部ラッパー: 編集画面とパディングを統一 --- %>
+      <div class="px-8 py-10 md:px-12 md:py-12">
+        <%# パーシャル呼び出し %>
+        <%= render 'form', trip: @trip, btn_text: "旅程を作成する" %>
+      </div>
+      
+    </div>
+
+    <%# 戻るリンク %>
+    <div class="mt-10 text-center">
+      <%= link_to trips_path, class: "text-gray-400 hover:text-purple-600 transition-colors text-sm font-bold inline-flex items-center gap-2" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+        </svg>
+        一覧に戻る
+      <% end %>
+    </div>
   </div>
 </div>

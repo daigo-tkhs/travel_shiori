@@ -15,9 +15,9 @@ class TripsController < ApplicationController
 
   def show
     authorize @trip
-    @hide_header = true
     @trip.spots.reload
     prepare_trip_show_data
+    @hide_header = true
   end
 
   def new
@@ -54,7 +54,6 @@ class TripsController < ApplicationController
     if @trip.update(trip_params)
       redirect_to @trip, notice: t('messages.trip.update_success')
     else
-      @hide_header = true
       flash.now[:alert] = t('messages.trip.update_failure')
       render :edit, status: :unprocessable_content
     end

@@ -3,6 +3,14 @@
 Rails.application.routes.draw do
   devise_for :users
 
+  # ログイン済みユーザーは、旅程一覧 (trips#index) へ
+  authenticated :user do
+    root 'trips#index', as: :authenticated_root
+  end
+
+  # 未ログインユーザーは、LP (static_pages#top) へ
+  root 'static_pages#top'
+
   # お気に入り一覧画面
   resources :favorites, only: [:index]
 
@@ -48,9 +56,6 @@ Rails.application.routes.draw do
 
   # 開発環境でのみメール確認画面を有効化
   mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
-
-  # アプリケーションのルートパス
-  root 'trips#index'
 
   get 'up' => 'rails/health#show', as: :rails_health_check
 end

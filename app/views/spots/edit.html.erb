@@ -1,10 +1,21 @@
-<%# app/views/spots/edit.html.erb %>
+<div class="min-h-screen w-full bg-gray-50 font-sans pt-12 pb-32">
+  <div class="max-w-2xl mx-auto px-6">
+    <div class="mb-8 flex items-center gap-4">
+      <%= link_to trip_path(@trip), class: "p-3 bg-white hover:bg-gray-100 rounded-full shadow-sm border border-gray-100 transition-colors" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 text-gray-600">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+        </svg>
+      <% end %>
+      <h1 class="text-2xl font-bold text-gray-900">スポットを編集</h1>
+    </div>
 
-<div class="max-w-7xl mx-auto p-4 space-y-6">
-  <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6">
-    <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">スポット情報の編集</h2>
-    
-    <%# フォームを呼び出します。キャンセルボタンはフォーム側に集約するため、ここでは呼び出しません %>
-    <%= render 'form', trip: @trip, spot: @spot, btn_text: "更新する" %>
+    <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+      <div class="px-8 py-10 md:px-12 md:py-12">
+        <%= render 'form', trip: @trip, spot: @spot, btn_text: "変更を保存する" %>
+        <div class="mt-6">
+          <%= link_to 'キャンセル', trip_path(@trip), class: "w-full block text-center py-4 rounded-full text-gray-500 font-bold bg-gray-100 hover:bg-gray-200 transition-all" %>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

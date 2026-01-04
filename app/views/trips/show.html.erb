@@ -1,4 +1,4 @@
-<div class="pb-24">
+<div class="pb-32">
   
   <%# --- 1. 詳細画面専用ヘッダー --- %>
   <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-md sticky top-0 z-50">
@@ -128,7 +128,6 @@
     <div class="mt-6"
       data-controller="map"
       data-map-api-key-value="<%= ENV['GOOGLE_MAPS_API_KEY'] || ENV['Maps_API_KEY'] %>"
-      <%# ★修正: Controllerでソートされた@spotsを使うことで、ピンの順番が全日程通し番号と一致します %>
       data-map-markers-value="<%= @spots.where.not(latitude: nil).map { |s| { lat: s.latitude, lng: s.longitude, title: s.name } }.to_json %>">
       
       <div class="mb-2 flex items-center gap-2">
@@ -137,31 +136,30 @@
         </svg>
         <h3 class="font-bold text-gray-700">地図</h3>
       </div>
-
       <div data-map-target="container" class="w-full h-[300px] rounded-xl shadow-md border border-gray-200"></div>
     </div>
-
   </div>
 
   <%# --- 4. AIチャットボタン (FAB) --- %>
-  <% if @trip && @trip.viewable_by?(current_user) %>
-    <div class="fixed bottom-24 left-0 w-full z-30 pointer-events-none">
-      <div class="w-full max-w-md md:max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto relative px-4">
-        <%= link_to trip_messages_path(@trip), class: "absolute right-4 bottom-0 pointer-events-auto group z-30" do %>
-          <div class="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-40 group-hover:opacity-60 transition duration-200"></div>
-          <div class="relative bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full shadow-xl flex items-center gap-2 px-5 py-3.5 transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
-            <div class="relative">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.159 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
-              </svg>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-2.5 h-2.5 absolute -top-1 -right-1 text-yellow-300 animate-pulse">
-                <path fill-rule="evenodd" d="M9 4.5a.75.75 0 0 1 .721.544l.813 2.846a3.75 3.75 0 0 0 2.576 2.576l2.846.813a.75.75 0 0 1 1.442l-2.846.813a3.75 3.75 0 0 0-2.576 2.576l-.813 2.846a.75.75 0 0 1-1.442 0l-.813-2.846a3.75 3.75 0 0 0-2.576-2.576l-2.846-.813a.75.75 0 0 1 0-1.442l2.846-.813a3.75 3.75 0 0 0 2.576-2.576l.813-2.846A.75.75 0 0 1 9 4.5ZM9 6a.75.75 0 0 1 .75.75V15a.75.75 0 0 1-1.5 0V6.75A.75.75 0 0 1 9 6Z" clip-rule="evenodd" />
-              </svg>
-            </div>
-            <span class="font-bold text-sm tracking-wide">AIとチャット</span>
+  <% if user_signed_in? %>
+    <div class="fixed z-[9999]" style="bottom: 100px; right: 24px;">
+      <%= link_to trip_messages_path(@trip), class: "group relative block" do %>
+        <%# 背景のボカシ演出 %>
+        <div class="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-40 group-hover:opacity-60 transition duration-200"></div>
+        
+        <%# ボタン本体 %>
+        <div class="relative bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full shadow-xl flex items-center gap-2 px-5 py-3.5 transition-transform duration-300 group-hover:scale-105 group-active:scale-95">
+          <div class="relative">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.159 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-2.5 h-2.5 absolute -top-1 -right-1 text-yellow-300 animate-pulse">
+              <path fill-rule="evenodd" d="M9 4.5a.75.75 0 0 1 .721.544l.813 2.846a3.75 3.75 0 0 0 2.576 2.576l2.846.813a.75.75 0 0 1 1.442l-2.846.813a3.75 3.75 0 0 0-2.576 2.576l-.813 2.846a.75.75 0 0 1-1.442 0l-.813-2.846a3.75 3.75 0 0 0-2.576-2.576l-2.846-.813a.75.75 0 0 1 0-1.442l2.846-.813a3.75 3.75 0 0 0 2.576-2.576l.813-2.846A.75.75 0 0 1 9 4.5ZM9 6a.75.75 0 0 1 .75.75V15a.75.75 0 0 1-1.5 0V6.75A.75.75 0 0 1 9 6Z" clip-rule="evenodd" />
+            </svg>
           </div>
-        <% end %>
-      </div>
+          <span class="font-bold text-sm tracking-wide">AIとチャット</span>
+        </div>
+      <% end %>
     </div>
   <% end %>
 
