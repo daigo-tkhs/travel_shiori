@@ -1,27 +1,36 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Connects to data-controller="flash"
 export default class extends Controller {
   connect() {
-    console.log("Flash controller connected!") 
+    // これがコンソールに出れば、HTMLとの紐付けは成功です
+    console.log("Flash controller connected!");
 
-    // 5秒後に削除アニメーションを開始
+    // 5秒後に自動で消すタイマー設定
     this.timeout = setTimeout(() => {
-      this.dismiss()
-    }, 5000)
+      this.dismiss();
+    }, 5000);
   }
 
+  // ×ボタンが押されたとき、またはタイマーで呼ばれる
   dismiss() {
-    console.log("Dismiss clicked") 
+    console.log("Dismissing flash message...");
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
 
-    clearTimeout(this.timeout)
-    // ふわっと消えるアニメーション
-    this.element.classList.add("opacity-0", "translate-y-[-20px]")
-    this.element.classList.remove("opacity-100", "translate-y-0")
+    // フェードアウトアニメーションのクラスを追加
+    this.element.classList.add("opacity-0", "-translate-y-4");
     
-    // アニメーション完了後（0.5秒後）に要素を削除
+    // アニメーションが終わる0.5秒後に要素を削除
     setTimeout(() => {
-      this.element.remove()
-    }, 500)
+      this.element.remove();
+    }, 500);
+  }
+
+  // コントローラーが外れる（ページ遷移など）時にタイマーを掃除
+  disconnect() {
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
   }
 }
