@@ -15,7 +15,7 @@ Rails.application.configure do
   config.action_controller.perform_caching = false
 
   # Code reloading is disabled in production.
-  config.enable_reloading = truee
+  config.enable_reloading = true
 
   # config.require_master_key = true # コメントアウトのまま維持
   # config.public_file_server.enabled = false # コメントアウトのまま維持
