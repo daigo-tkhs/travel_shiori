@@ -3,29 +3,14 @@ import debounce from "debounce"
 
 export default class extends Controller {
   static targets = [ "address", "latitude", "longitude", "submit" ] 
+  // HTML側でAPIキーを読み込むため、ここでapiKeyの値を受け取る必要は基本なくなりますが、
+  // 他のロジックで使う可能性も考慮し、定義は残しても無害です。
   static values = { apiKey: String }
 
   connect() {
     this.geocodeDebounced = debounce(this.geocode, 800)
-    this.loadGoogleMaps()
+    // this.loadGoogleMaps() ← ★削除: HTML側で読み込むため不要
     this.toggleSubmitButton()
-  }
-
-  loadGoogleMaps() {
-    // マーカー機能(marker)まで読み込まれているかチェック
-    if (window.google && window.google.maps && window.google.maps.marker) return
-
-    const existingScript = document.querySelector(`script[src*="maps.googleapis.com/maps/api/js"]`)
-    // 既存スクリプトがあっても、markerが含まれていないURLなら無視して読み込み直す判定が必要だが
-    // 今回は重複を避けるため、既存があれば一旦任せる（ただしGeocodingが先に走るとMapが失敗するリスクはある）
-    if (existingScript) return
-
-    const script = document.createElement("script")
-    // ▼▼▼ Mapコントローラーと完全に一致させる (libraries=places,marker) ▼▼▼
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${this.apiKeyValue}&libraries=places,marker&v=weekly`
-    script.async = true
-    script.defer = true
-    document.head.appendChild(script)
   }
 
   async geocode() {
@@ -37,7 +22,11 @@ export default class extends Controller {
       return
     }
 
-    if (!window.google || !window.google.maps) return
+    // Google Maps APIがまだ読み込まれていない場合のガード
+    if (!window.google || !window.google.maps) {
+      console.warn("Google Maps API is not loaded yet.")
+      return
+    }
 
     const geocoder = new google.maps.Geocoder()
 

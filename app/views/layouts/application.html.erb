@@ -1,4 +1,3 @@
-<%# app/views/layouts/application.html.erb %>
 <!DOCTYPE html>
 <html>
   <head>
@@ -16,17 +15,14 @@
     <% end %>
     
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvW_gEtHZ40kEAJJjeNyV22SO0tbsmusw&libraries=places,marker&v=weekly&loading=async" async defer></script>
   </head>
 
   <body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
     
     <%= render 'shared/header' unless @hide_header %>
 
-    <%# 
-       ★修正: ここが重要！
-       Turbo Streamのターゲットとなる「箱」をここに設置します。
-       中身のHTMLは _flash_messages.html.erb が提供します。
-    %>
     <div id="flash" class="fixed top-24 right-4 z-[9999] w-full max-w-sm pointer-events-none">
       <%= render 'shared/flash_messages' %>
     </div>
@@ -42,6 +38,3 @@
     </div>
   </body>
 </html>
-
-<%# ↓ あなたのAPIキー（AIza...）を直接貼り付けます %>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvW_gEtHZ40kEAJJjeNyV22SO0tbsmusw&libraries=places,marker&v=weekly&loading=async" async defer></script>
