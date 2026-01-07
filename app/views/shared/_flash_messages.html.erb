@@ -12,16 +12,12 @@
       %>
       
       <%# Stimulusコントローラー(flash)を紐付け %>
-      <%# pointer-events-auto が重要です。これがないとクリックが透過してしまいます %>
       <div data-controller="flash"
            class="flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl <%= color_class %> w-full transform transition-all duration-500 pointer-events-auto opacity-100 translate-y-0"
            role="alert"
-           data-transition-enter-class="opacity-0 -translate-y-4"
-           data-transition-enter-active-class="transition ease-out duration-300"
-           data-transition-enter-to-class="opacity-100 translate-y-0"
-           data-transition-leave-class="opacity-100 translate-y-0"
-           data-transition-leave-active-class="transition ease-in duration-300"
-           data-transition-leave-to-class="opacity-0 -translate-y-4">
+           data-transition-leave-active="transition ease-in duration-300"
+           data-transition-leave-from="opacity-100 translate-y-0"
+           data-transition-leave-to="opacity-0 -translate-y-4">
         
         <div class="font-bold text-sm flex-1">
           <%= msg %>

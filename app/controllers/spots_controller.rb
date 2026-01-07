@@ -32,9 +32,10 @@ class SpotsController < ApplicationController
         format.turbo_stream do
           @spots_by_day = @trip.spots.order(day_number: :asc, position: :asc).group_by(&:day_number)
           
+          flash.now[:notice] = "#{@spot.name} を追加しました"
+          
           render turbo_stream: [
-            # ★修正: localsを使ってメッセージを直接渡します
-            turbo_stream.update("flash", partial: "shared/flash_messages", locals: { message: "#{@spot.name} を追加しました", type: :notice }),
+            turbo_stream.update("flash", partial: "shared/flash_messages"),
             turbo_stream.replace("trip_schedule_frame", partial: "trips/schedule", locals: { trip: @trip, spots_by_day: @spots_by_day })
           ]
         end
@@ -55,9 +56,11 @@ class SpotsController < ApplicationController
         
         format.turbo_stream do
           @spots_by_day = @trip.spots.order(day_number: :asc, position: :asc).group_by(&:day_number)
+          
+          flash.now[:notice] = "#{@spot.name} を更新しました"
+
           render turbo_stream: [
-            # ★修正: localsを使ってメッセージを直接渡します
-            turbo_stream.update("flash", partial: "shared/flash_messages", locals: { message: "#{@spot.name} を更新しました", type: :notice }),
+            turbo_stream.update("flash", partial: "shared/flash_messages"),
             turbo_stream.replace("trip_schedule_frame", partial: "trips/schedule", locals: { trip: @trip, spots_by_day: @spots_by_day })
           ]
         end
@@ -76,10 +79,12 @@ class SpotsController < ApplicationController
     respond_to do |format|
       format.turbo_stream do
         @spots_by_day = @trip.spots.order(day_number: :asc, position: :asc).group_by(&:day_number)
+        
+        flash.now[:alert] = "#{spot_name} を削除しました"
+
         render turbo_stream: [
           turbo_stream.replace("trip_schedule_frame", partial: "trips/schedule", locals: { trip: @trip, spots_by_day: @spots_by_day }),
-          # ★修正: localsを使ってメッセージを直接渡します
-          turbo_stream.update("flash", partial: "shared/flash_messages", locals: { message: "#{spot_name} を削除しました", type: :alert })
+          turbo_stream.update("flash", partial: "shared/flash_messages")
         ]
       end
       format.html { redirect_to @trip, status: :see_other, notice: "#{spot_name} を削除しました" }
@@ -157,6 +162,7 @@ class SpotsController < ApplicationController
     spots_on_day = @trip.spots.where(day_number: day_number).order(:position)
     return unless spots_on_day.present?
     
+    # いったんリセット
     spots_on_day.update_all(travel_time: nil)
     
     spots_on_day.each_with_index do |current_spot, index|
@@ -165,8 +171,13 @@ class SpotsController < ApplicationController
       
       if current_spot.geocoded? && next_spot.geocoded?
         begin
-          api_key = ENV['GOOGLE_MAPS_API_KEY'] || ENV['Maps_API_KEY']
-          next unless api_key.present?
+          # ▼▼▼ 修正: APIキー取得をcredentials優先にし、環境変数もフォールバックとして使用 ▼▼▼
+          api_key = Rails.application.credentials.dig(:google_maps, :api_key) || ENV['GOOGLE_MAPS_API_KEY'] || ENV['Maps_API_KEY']
+          
+          unless api_key.present?
+            Rails.logger.error "Travel Calc Error: API Key not found."
+            next
+          end
           
           uri = URI("https://maps.googleapis.com/maps/api/directions/json")
           uri.query = URI.encode_www_form({
@@ -176,10 +187,16 @@ class SpotsController < ApplicationController
             mode: 'driving'
           })
           
-          data = JSON.parse(Net::HTTP.get(uri))
+          response = Net::HTTP.get(uri)
+          data = JSON.parse(response)
+
           if data['status'] == 'OK'
+            # 分単位に変換して保存
             duration = (data['routes'][0]['legs'][0]['duration']['value'] / 60.0).round.to_i
             current_spot.update_columns(travel_time: duration, updated_at: Time.current)
+          else
+            # エラーの詳細をログに残す
+            Rails.logger.error "Directions API Error: #{data['status']} - #{data['error_message']}"
           end
         rescue => e
           Rails.logger.error "Travel recalculate error: #{e.message}"
