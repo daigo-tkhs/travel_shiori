@@ -127,7 +127,7 @@
     <%# --- Google Maps埋め込み --- %>
     <div class="mt-6"
       data-controller="map"
-      data-map-api-key-value="<%= ENV['GOOGLE_MAPS_API_KEY'] || ENV['Maps_API_KEY'] %>"
+      data-map-api-key-value="<%= ENV['GOOGLE_MAPS_API_KEY'] %>"
       data-map-markers-value="<%= @spots.where.not(latitude: nil).map { |s| { lat: s.latitude, lng: s.longitude, title: s.name } }.to_json %>">
       
       <div class="mb-2 flex items-center gap-2">

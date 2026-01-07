@@ -1,25 +1,14 @@
-# config/importmap.rb
+# Pin npm packages by running ./bin/importmap
 
 pin "application"
-pin "@hotwired/turbo-rails", to: "@hotwired--turbo-rails.js"
-pin "@hotwired/stimulus", to: "@hotwired--stimulus.js"
-pin "@hotwired/stimulus-loading", to: "stimulus-loading.js"
 
-# ▼ これをコメントアウトします
-# pin_all_from "app/javascript/controllers", under: "controllers"
+pin "@hotwired/turbo-rails", to: "https://ga.jspm.io/npm:@hotwired/turbo-rails@8.0.12/app/javascript/turbo/index.js"
+pin "@hotwired/stimulus", to: "https://ga.jspm.io/npm:@hotwired/stimulus@3.2.2/dist/stimulus.js"
 
-# ▼ 個別に手動でピン留めします（.jsを明示し、ハッシュ化に対応させる）
-pin "controllers/application", to: "controllers/application.js"
-pin "controllers/hello_controller", to: "controllers/hello_controller.js"
 pin "controllers", to: "controllers/index.js"
-pin "controllers/index", to: "controllers/index.js"
-pin "controllers/map_controller", to: "controllers/map_controller.js"
-pin "controllers/sortable_controller", to: "controllers/sortable_controller.js"
-pin "controllers/geocoding_controller", to: "controllers/geocoding_controller.js"
-pin "controllers/scroll_controller", to: "controllers/scroll_controller.js"
+pin_all_from "app/javascript/controllers", under: "controllers"
 
-# その他のライブラリ
-pin "sortablejs" 
-pin "@rails/actioncable/src", to: "@rails--actioncable--src.js"
-pin "debounce"
-pin "@hotwired/turbo", to: "@hotwired--turbo.js"
+pin "sortablejs", to: "https://ga.jspm.io/npm:sortablejs@1.15.2/modular/sortable.esm.js"
+pin "debounce", to: "https://ga.jspm.io/npm:debounce@1.2.1/index.js"
+pin "@rails/actioncable/src", to: "https://ga.jspm.io/npm:@rails/actioncable@7.1.3/src/index.js"
+pin "@hotwired/turbo", to: "https://ga.jspm.io/npm:@hotwired/turbo@8.0.12/dist/turbo.es2017-esm.js"

@@ -13,14 +13,11 @@
       <script type="module" src="<%= asset_path 'controllers/map_controller.js' %>"></script>
       <script type="module" src="<%= asset_path 'controllers/sortable_controller.js' %>"></script>
       <script type="module" src="<%= asset_path 'controllers/geocoding_controller.js' %>"></script>
-      <%# ★ これで本番でも×ボタンが動くようになります %>
       <script type="module" src="<%= asset_path 'controllers/flash_controller.js' %>"></script>
     <% end %>
     
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
 
-    <%# loading=async を維持しつつ、セキュアにします %>
-    <script src="https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_MAPS_API_KEY'] %>&libraries=places,marker&v=weekly&loading=async" async defer></script>
   </head>
 
   <body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
