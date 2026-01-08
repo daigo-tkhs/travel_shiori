@@ -1,3 +1,4 @@
+# app/controllers/spots_controller.rb
 # frozen_string_literal: true
 require 'uri'
 require 'net/http'
@@ -119,6 +120,10 @@ class SpotsController < ApplicationController
 
   def duplicate
     @new_spot = @spot.dup
+    
+    # ★修正: 複製時にpositionや移動時間をリセットして、安全に新規作成として扱う
+    @new_spot.position = nil 
+    @new_spot.travel_time = nil
 
     if @new_spot.save
       recalculate_all_travel_times_for_day(@new_spot.day_number)

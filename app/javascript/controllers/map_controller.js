@@ -1,3 +1,4 @@
+// app/javascript/controllers/map_controller.js
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
@@ -5,11 +6,17 @@ export default class extends Controller {
   static values = { apiKey: String, markers: Array }
 
   connect() {
+    // 読み込み済みフラグをリセット（念のため）
+    this.googleMapsLoaded = false
     this.loadGoogleMaps()
   }
 
   spotImageTargetConnected(element) {
-    this.loadPhotoForElement(element)
+    if (this.googleMapsLoaded) {
+      this.loadPhotoForElement(element)
+    } else {
+
+    }
   }
 
   loadGoogleMaps() {
@@ -18,15 +25,23 @@ export default class extends Controller {
       return
     }
 
-    const script = document.createElement("script")
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${this.apiKeyValue}&libraries=places,marker&v=weekly`
-    script.async = true
-    script.defer = true
-    script.onload = () => this.initMap()
-    document.head.appendChild(script)
+    // 既にスクリプトタグが存在するかチェック（多重ロード防止）
+    if (document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]')) {
+    } else {
+      const script = document.createElement("script")
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${this.apiKeyValue}&libraries=places,marker&v=weekly`
+      script.async = true
+      script.defer = true
+      
+      script.onload = () => this.initMap()
+      document.head.appendChild(script)
+    }
   }
 
   async initMap() {
+    // フラグを立てる
+    this.googleMapsLoaded = true
+
     if (!this.hasContainerTarget) return
 
     if (!google.maps.marker) {
@@ -49,6 +64,7 @@ export default class extends Controller {
 
     this.map = new google.maps.Map(this.containerTarget, mapOptions)
     this.addMarkers()
+    this.spotImageTargets.forEach(target => this.loadPhotoForElement(target))
   }
 
   async addMarkers() {
@@ -89,6 +105,8 @@ export default class extends Controller {
   }
 
   async loadPhotoForElement(target) {
+    if (!window.google || !window.google.maps) return
+
     const spotName = target.dataset.spotName
     if (!spotName) return
 
@@ -116,6 +134,7 @@ export default class extends Controller {
           this.injectPhoto(target, photoUrl);
       }
     } catch (error) {
+      // エラーログ抑制
     }
   }
 

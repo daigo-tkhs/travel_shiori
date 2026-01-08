@@ -3,7 +3,6 @@
 <%# APIキーの取得：ENVを優先的に使用するシンプルな記述に変更 %>
 <% api_key_value = ENV['GOOGLE_MAPS_API_KEY'] || Rails.application.credentials.dig(:google_maps, :api_key) %>
 
-<%# ▼▼▼ 修正点: data: { turbo: false } を削除しました ▼▼▼ %>
 <%= form_with model: [trip, spot],
   data: { 
     controller: "geocoding", 
@@ -60,7 +59,7 @@
 
     <%# 滞在時間（時間・分） %>
     <div class="space-y-2">
-      <%= f.label :duration, "滞在時間", class: "block text-sm font-bold text-gray-700 ml-1" %>
+      <%= f.label :duration_hours, "滞在時間", class: "block text-sm font-bold text-gray-700 ml-1" %>
       <div class="flex items-center gap-4">
         <%# 時間入力 %>
         <div class="flex-1 relative">
@@ -85,7 +84,6 @@
     <%= f.submit btn_text, class: "w-full py-4 px-6 rounded-full text-white font-bold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg transform active:scale-95 transition-all cursor-pointer text-lg" %>
     
     <div class="mt-4 text-center">
-      <%# キャンセルボタンも turbo: false を外すと、戻る際も高速になります %>
       <%= link_to "キャンセルして戻る", trip_path(trip), class: "text-sm font-bold text-gray-400 hover:text-gray-600 transition underline decoration-gray-300" %>
     </div>
   </div>
