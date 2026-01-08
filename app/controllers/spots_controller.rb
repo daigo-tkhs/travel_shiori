@@ -6,8 +6,8 @@ require 'json'
 class SpotsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_trip
-  before_action :ensure_editable!, only: %i[new create edit update destroy move]
-  before_action :set_spot, only: %i[show edit update destroy move]
+  before_action :ensure_editable!, only: %i[new create edit update destroy move duplicate]
+  before_action :set_spot, only: %i[show edit update destroy move duplicate]
   before_action :clean_spot_params, only: %i[create update]
 
   def show
@@ -117,6 +117,30 @@ class SpotsController < ApplicationController
     head :unprocessable_entity
   end
 
+  def duplicate
+    @new_spot = @spot.dup
+
+    if @new_spot.save
+      recalculate_all_travel_times_for_day(@new_spot.day_number)
+      
+      respond_to do |format|
+        format.turbo_stream do
+          @spots_by_day = @trip.spots.order(day_number: :asc, position: :asc).group_by(&:day_number)
+          
+          flash.now[:notice] = "#{@new_spot.name} をコピーしました"
+          
+          render turbo_stream: [
+            turbo_stream.update("flash", partial: "shared/flash_messages"),
+            turbo_stream.replace("trip_schedule_frame", partial: "trips/schedule", locals: { trip: @trip, spots_by_day: @spots_by_day })
+          ]
+        end
+        format.html { redirect_to @trip, notice: "#{@new_spot.name} をコピーしました" }
+      end
+    else
+      redirect_to @trip, alert: "コピーに失敗しました"
+    end
+  end
+
   private
 
   def set_trip
@@ -162,7 +186,6 @@ class SpotsController < ApplicationController
     spots_on_day = @trip.spots.where(day_number: day_number).order(:position)
     return unless spots_on_day.present?
     
-    # いったんリセット
     spots_on_day.update_all(travel_time: nil)
     
     spots_on_day.each_with_index do |current_spot, index|
@@ -171,7 +194,6 @@ class SpotsController < ApplicationController
       
       if current_spot.geocoded? && next_spot.geocoded?
         begin
-          # ▼▼▼ 修正: APIキー取得をcredentials優先にし、環境変数もフォールバックとして使用 ▼▼▼
           api_key = Rails.application.credentials.dig(:google_maps, :api_key) || ENV['GOOGLE_MAPS_API_KEY'] || ENV['Maps_API_KEY']
           
           unless api_key.present?
@@ -191,11 +213,9 @@ class SpotsController < ApplicationController
           data = JSON.parse(response)
 
           if data['status'] == 'OK'
-            # 分単位に変換して保存
             duration = (data['routes'][0]['legs'][0]['duration']['value'] / 60.0).round.to_i
             current_spot.update_columns(travel_time: duration, updated_at: Time.current)
           else
-            # エラーの詳細をログに残す
             Rails.logger.error "Directions API Error: #{data['status']} - #{data['error_message']}"
           end
         rescue => e

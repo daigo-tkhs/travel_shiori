@@ -5,24 +5,21 @@ Rails.application.routes.draw do
   
   resources :users, only: [:show]
 
-  # ログイン済みユーザーは、旅程一覧 (trips#index) へ
   authenticated :user do
     root 'trips#index', as: :authenticated_root
   end
 
-  # 未ログインユーザーは、LP (static_pages#top) へ
   root 'static_pages#top'
 
-  # お気に入り一覧画面
   resources :favorites, only: [:index]
 
-  # 旅程に関するリソースを定義
   resources :trips do
     resources :messages, only: %i[index show create edit update destroy]
 
     resources :spots, only: %i[new create edit update destroy] do
       member do
         patch :move
+        post :duplicate
       end
     end
 

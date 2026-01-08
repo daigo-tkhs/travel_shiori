@@ -25,7 +25,7 @@ class Spot < ApplicationRecord
   validates :travel_time, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
   validates :duration, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
 
-  # ★追加: 旅行期間外の日付入力を防ぐカスタムバリデーション
+  # 旅行期間外の日付入力を防ぐカスタムバリデーション
   validate :day_number_within_trip_dates
 
   # 緯度・経度がセットされているか判定するヘルパー

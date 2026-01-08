@@ -1,11 +1,15 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["container"] 
+  static targets = ["container", "spotImage"] 
   static values = { apiKey: String, markers: Array }
 
   connect() {
     this.loadGoogleMaps()
+  }
+
+  spotImageTargetConnected(element) {
+    this.loadPhotoForElement(element)
   }
 
   loadGoogleMaps() {
@@ -16,10 +20,8 @@ export default class extends Controller {
 
     const script = document.createElement("script")
     script.src = `https://maps.googleapis.com/maps/api/js?key=${this.apiKeyValue}&libraries=places,marker&v=weekly`
-    
     script.async = true
     script.defer = true
-    
     script.onload = () => this.initMap()
     document.head.appendChild(script)
   }
@@ -47,7 +49,6 @@ export default class extends Controller {
 
     this.map = new google.maps.Map(this.containerTarget, mapOptions)
     this.addMarkers()
-    this.loadSpotPhotos()
   }
 
   async addMarkers() {
@@ -87,9 +88,11 @@ export default class extends Controller {
     }
   }
 
-  async loadSpotPhotos() {
-    const targets = document.querySelectorAll('[data-map-target="spotImage"]')
-    if (targets.length === 0) return
+  async loadPhotoForElement(target) {
+    const spotName = target.dataset.spotName
+    if (!spotName) return
+
+    if (target.querySelector('img')) return
 
     let Place;
     try {
@@ -100,26 +103,20 @@ export default class extends Controller {
         return;
     }
 
-    targets.forEach(async (target) => {
-      const spotName = target.dataset.spotName
-      if (!spotName) return
+    try {
+      const { places } = await Place.searchByText({
+          textQuery: spotName,
+          fields: ['photos'],
+          maxResultCount: 1,
+      });
 
-      try {
-        const { places } = await Place.searchByText({
-            textQuery: spotName,
-            fields: ['photos'],
-            maxResultCount: 1,
-        });
-
-        if (places && places.length > 0 && places[0].photos && places[0].photos.length > 0) {
-            const photo = places[0].photos[0];
-            const photoUrl = photo.getURI({ maxWidth: 400 });
-            this.injectPhoto(target, photoUrl);
-        }
-      } catch (error) {
-        console.warn(`Photo fetch failed for ${spotName}:`, error);
+      if (places && places.length > 0 && places[0].photos && places[0].photos.length > 0) {
+          const photo = places[0].photos[0];
+          const photoUrl = photo.getURI({ maxWidth: 400 });
+          this.injectPhoto(target, photoUrl);
       }
-    })
+    } catch (error) {
+    }
   }
 
   injectPhoto(targetElement, url) {
