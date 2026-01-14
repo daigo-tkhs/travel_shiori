@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# app/helpers/messages_helper.rb
 
 module MessagesHelper
   # ------------------------------------------------------------------
@@ -60,16 +61,31 @@ module MessagesHelper
   end
 
   # ------------------------------------------------------------------
-  # 2. AIレスポンスのパース処理
+  # 2. AIレスポンスのパース処理（強化版）
   # ------------------------------------------------------------------
   def parse_spot_suggestion(response_text)
     return nil if response_text.blank?
 
+    json_string = nil
+
+    # パターンA: マークダウンのコードブロック (```json ... ```) がある場合
+    if match = response_text.match(/```json\s*(.*?)\s*```/m)
+      json_string = match[1]
+    
+    # パターンB: コードブロックはないが、{ ... } の形式である場合
+    # (最初に出現する '{' から、最後に出現する '}' までを抜き出す)
+    elsif match = response_text.match(/(\{.*\})/m)
+      json_string = match[1]
+    else
+      # JSONらしきものが見つからない場合はそのまま
+      json_string = response_text
+    end
+
     begin
-      # JSONブロックの前後の余計な文字列を除去
-      cleaned_text = response_text.to_s.gsub(/^```json\s*/, '').gsub(/\s*```$/, '')
-      JSON.parse(cleaned_text)
+      # 抽出した文字列をパースする
+      JSON.parse(json_string)
     rescue JSON::ParserError
+      # パース失敗時は nil を返し、通常のテキストとして表示させる
       nil
     end
   end
